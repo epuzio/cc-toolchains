@@ -1,5 +1,16 @@
 [
   {
+    "group": "CC: 1D Functions",
+    "icon": "bezier-curve",
+    "entries": [
+      {
+        "displayName": "Sinusoidal",
+        "path": "coilCAM/functions1D/sinusoidal"
+      }
+    ]
+  },
+  
+  {
     "group": "Math and Logic",
     "icon": "calculator",
     "entries": [

@@ -28,6 +28,7 @@ const config = {
 };
 
 function dataViewer(inports, outports, state, global) {
+  console.log("DATA VIEWER IN", inports.in.value);
   let editorRef = createRef();
   let view;
 
