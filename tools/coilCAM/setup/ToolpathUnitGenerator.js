@@ -61,7 +61,6 @@ const config = {
 
 
 function setParameter(input, parameter_name, nbLayers=[], nbPointsInLayer=[]){ //revise and simplify
-    console.log("set parameter param name", parameter_name);
     if(parameter_name === "radiusShapingParameter"){ //radsp runs calculations using nbPointsInLayer
         if(!Array.isArray(input)){
             return new Array(nbPointsInLayer).fill(input);
@@ -144,7 +143,6 @@ function setParameter(input, parameter_name, nbLayers=[], nbPointsInLayer=[]){ /
         } else{
             valuesy = input[1];
         }   
-        console.log(valuesx, valuesy);
         return new Array(valuesx, valuesy);
         
                
@@ -169,20 +167,11 @@ function setParameter(input, parameter_name, nbLayers=[], nbPointsInLayer=[]){ /
 }
 
 function toolpathUnitGenerator(inports, outports){
-    console.log("params", inports.position.value, inports.radius.value, inports.layerHeight.value, inports.nbLayers.value, inports.nbPointsInLayer.value,
-        inports.radiusSP.value, inports.scaleSP.value, inports.scalingSP.value,
-        inports.translateSP.value, inports.rotateSP.value, inports.thicknessSP.value);
-    
     function inportsUpdated() {
         if(inports.position.value !== null && inports.radius.value !== null && inports.layerHeight.value !== null && inports.nbLayers.value !== null && inports.nbPointsInLayer.value !== null){
-            console.log("params", inports.position.value, inports.radius.value, inports.layerHeight.value, inports.nbLayers.value, inports.nbPointsInLayer.value,
-                inports.radiusSP.value, inports.scaleSP.value, inports.scalingSP.value,
-                inports.translateSP.value, inports.rotateSP.value, inports.thicknessSP.value);
-            
             outports.path.value = generatePath(inports.position.value, inports.radius.value, inports.layerHeight.value, inports.nbLayers.value, inports.nbPointsInLayer.value,
                 inports.radiusSP.value, inports.scaleSP.value, inports.scalingSP.value,
                 inports.translateSP.value, inports.rotateSP.value, inports.thicknessSP.value);
-            console.log("OUT", outports.path.value);
         }  
     }
     return { inportsUpdated };
@@ -199,8 +188,6 @@ function generatePath(position, initialRadius, layerHeight, nbLayers, nbPointsIn
     let srsp = setParameter(scalingRadiusShapingParameter, "scalingRadiusShapingParameter", nbLayers);
     let thsp = setParameter(thicknessShapingParameter, "thicknessShapingParameter", nbLayers, nbPointsInLayer);
     
-    console.log("params in TUG", radsp, ssp, rsp, tsp, srsp, thsp);
-
     let k = 0; //accounting for case where radsp is a 2D array
     let ctr = 0;
     for(let j = 0; j < nbLayers; j++){
