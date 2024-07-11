@@ -6,6 +6,53 @@
       {
         "displayName": "Sinusoidal",
         "path": "coilCAM/functions1D/sinusoidal"
+      },
+      {
+        "displayName": "Linear",
+        "path": "coilCAM/functions1D/linear"
+      },
+      {
+        "displayName": "Exponential",
+        "path": "coilCAM/functions1D/exponential"
+      },
+      {
+        "displayName": "Staircase",
+        "path": "coilCAM/functions1D/staircase"
+      },
+      {
+        "displayName": "Square",
+        "path": "coilCAM/functions1D/square"
+      }
+    ]
+  },
+  {
+    "group": "CC: 2D Functions",
+    "icon": "bezier-curve",
+    "entries": [
+      {
+        "displayName": "Linear2D",
+        "path": "coilCAM/functions2D/linear2D"
+      },
+      {
+        "displayName": "Sinusoidal2D",
+        "path": "coilCAM/functions2D/sinusoidal2D"
+      }
+    ]
+  },
+  {
+    "group": "CC: Boolean",
+    "icon": "bezier-curve",
+    "entries": [
+      
+    ]
+  },
+  {
+    "group": "CC: Setup",
+    "icon": "bezier-curve",
+    "entries": [
+      {
+        "displayName": "ToolpathUnitGenerator",
+        "path": "coilCAM/setup/ToolpathUnitGenerator"
       }
     ]
   },
@@ -171,6 +218,10 @@
       {
         "displayName": "Boolean",
         "path": "inputs/bool"
+      },
+      {
+        "displayName": "Point",
+        "path": "inputs/point"
       }
     ]
   },
