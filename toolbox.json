@@ -13,7 +13,7 @@
       },
       {
         "displayName": "Exponential",
-        "path": "coilCAM/functions1D/exponential"
+        "path": "coilCAM/functions1D/ccexponential"
       },
       {
         "displayName": "Staircase",
