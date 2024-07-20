@@ -150,6 +150,21 @@ const renderPts = (path, pathKey) => {
       );
     }
 
+    if (type === "circle") {
+      // Draw a reference circle
+      const [_, center, radius] = cmd;
+        result.push(svg`
+        <circle
+          cx=${center[0]}
+          cy=${center[1]}
+          r=${radius}
+          stroke-width="0.5"
+          stroke=${"var(--gray)"}
+          class="circle"
+          fill="none"
+        >`);
+    }
+
     if (type === "cubic") {
       // Draw a point and handles
       const [_, h0, p0, h1] = cmd;
@@ -207,6 +222,7 @@ const renderPts = (path, pathKey) => {
           })
         );
     }
+
 
     if (type === "rel") {
     }

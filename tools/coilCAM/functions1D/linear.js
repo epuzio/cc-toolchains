@@ -1,5 +1,9 @@
 import { html } from "lit-html";
 
+import {functions1D} from "coilcam/dist/main";
+const {linear: ccLinear} = functions1D; //avoid naming conflict
+
+
 const config = {
   inports: {
     amplitude: {
@@ -7,7 +11,7 @@ const config = {
         value: null,
     },
     offset: {
-        type: "any", //check
+        type: "any", 
         value: null,
     },
     nbPoints: {
@@ -35,43 +39,11 @@ const config = {
     height: 50,
   },
 };
-function setParams(value, nbPoints){
-    if (value == null){
-        return new Array(nbPoints).fill(0);
-    } else if(!Array.isArray(value)){
-        return new Array(nbPoints).fill(value);
-    } else if(value.length == nbPoints){
-        return value;   
-    }
-    return null;
-}
+
 function linear(inports, outports) { //for now, resemble constants
     function inportsUpdated() {
         if (inports.amplitude.value !== null && inports.nbPoints.value !== null) {
-            inports.offset.value = setParams(inports.offset.value, inports.nbPoints.value, inports.mode.value);
-            inports.values0.value = setParams(inports.values0.value, inports.nbPoints.value, inports.mode.value);
-
-           if(inports.values0.value == null || inports.offset.value == null){
-                outports.values.value = null;
-                return;
-            }
-
-            let out = [];
-            for (let i = 0; i < inports.nbPoints.value; i++){
-                if (inports.mode.value == "multiplicative"){
-                    if(inports.values0.value.every(v => v === 0)){ //if all values0 are 0, do not include values0
-                        out.push(((inports.amplitude.value * i) + inports.offset.value[i]));
-                    }
-                    else{
-                        out.push(((inports.amplitude.value * i) + inports.offset.value[i]) * inports.values0.value[i]);
-                    }
-                } else if (inports.mode.value == "additive" || inports.mode.value == null){
-                    out.push(((inports.amplitude.value * i) + inports.offset.value[i]) + inports.values0.value[i]);
-                }
-            }
-            outports.values.value = out;
-        } else {
-            outports.values.value = null;
+            outports.values.value = ccLinear(inports.amplitude.value, inports.offset.value, inports.nbPoints.value, inports.values0.value,inports.mode.value)
         }
     }
     return {inportsUpdated};

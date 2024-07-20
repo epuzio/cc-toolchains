@@ -1,24 +1,31 @@
 import { html } from "lit-html";
 
+import {functions2D} from "coilcam/dist/main";
+const {sinusoidal2D: ccSinusoidal2D} = functions2D; //avoid naming conflict
+
 const config = {
   inports: {
-    amplitudeX1: {
+    amplitudeX: {
         type: "number",
         value: null,
     },
-    periodX1: {
+    periodX: {
         type: "number",
         value: null,
     },
-    amplitudeX2: {
+    offsetX: {
+        type: "any", //check
+        value: null,
+    },
+    amplitudeY: {
         type: "number",
         value: null,
     },
-    periodX2: {
+    periodY: {
         type: "number",
         value: null,
     },
-    offset: {
+    offsetY: {
         type: "any", //check
         value: null,
     },
@@ -26,11 +33,11 @@ const config = {
         type: "number",
         value: null,
     },
-    values0x: {
+    valuesX: {
         type: "any",
         value: null,
     },
-    values0y: {
+    valuesY: {
         type: "any",
         value: null,
     },
@@ -51,49 +58,12 @@ const config = {
     height: 50,
   },
 };
-function setParams(value, nbPoints){
-    if (value == null){
-        return new Array(nbPoints).fill(0);
-    } else if(!Array.isArray(value)){
-        return new Array(nbPoints).fill(value);
-    } else if(value.length == nbPoints){
-        return value;   
-    }
-    return null;
-}
+
 function sinusoidal2D(inports, outports) { //for now, resemble constants
     function inportsUpdated() {
-        if (inports.amplitudeX1.value !== null && inports.amplitudeX2.value !== null && inports.periodX2.value !== null && inports.periodX1.value !== null && inports.nbPoints.value !== null) {
-            inports.offset.value = setParams(inports.offset.value, inports.nbPoints.value, inports.mode.value);
-            inports.values0x.value = setParams(inports.values0x.value, inports.nbPoints.value, inports.mode.value);
-            inports.values0y.value = setParams(inports.values0y.value, inports.nbPoints.value, inports.mode.value);
-
-           if(inports.values0x.value == null || inports.values0y.value == null || inports.offset.value == null){
-                outports.values.value = null;
-                return;
-            }
-
-            let pointsX = [];
-            let pointsY = [];
-            for (let i = 0; i < inports.nbPoints.value; i++){
-                if (inports.mode.value == "multiplicative"){
-                    if(inports.values0.value.every(v => v === 0)){ //if all values0 are 0, do not include values0
-                        pointsX.push(inports.amplitudeX1.value * Math.cos(2 * Math.PI * i / inports.periodX1.value + inports.offset.value[i]));
-                        pointsY.push(inports.amplitudeX2.value * Math.sin(2 * Math.PI * i / inports.periodX2.value + inports.offset.value[i]));    
-                    }
-                    else{
-                        pointsX.push(inports.amplitudeX1.value * Math.cos(2 * Math.PI * i / inports.periodX1.value + inports.offset.value[i]) * inports.values0x.value[i]);
-                        pointsY.push(inports.amplitudeX2.value * Math.sin(2 * Math.PI * i / inports.periodX2.value + inports.offset.value[i]) * inports.values0y.value[i]);
-                    }
-                } else if (inports.mode.value == "additive" || inports.mode.value == null){
-                    pointsX.push(inports.amplitudeX1.value * Math.cos(2 * Math.PI * i / inports.periodX1.value + inports.offset.value[i]) + inports.values0x.value[i]);
-                    pointsY.push(inports.amplitudeX2.value * Math.sin(2 * Math.PI * i / inports.periodX2.value + inports.offset.value[i]) + inports.values0y.value[i]);
-                }
-            }
-            console.log("sin2d", new Array(pointsX, pointsY));
-            outports.values.value = new Array(pointsX, pointsY);
-        } else {
-            outports.values.value = null;
+        if (inports.amplitudeX.value !== null && inports.amplitudeY.value !== null && inports.periodY.value !== null && inports.periodX.value !== null && inports.nbPoints.value !== null) {
+            outports.values.value = ccSinusoidal2D(inports.amplitudeX.value, inports.periodX.value, inports.amplitudeY.value, inports.periodY.value, inports.offsetX.value, inports.offsetY.value,
+                inports.nbPoints.value, inports.valuesX.value, inports.valuesY.value, inports.mode.value);
         }
     }
     return {inportsUpdated};

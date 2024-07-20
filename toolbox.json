@@ -13,7 +13,7 @@
       },
       {
         "displayName": "Exponential",
-        "path": "coilCAM/functions1D/ccexponential"
+        "path": "coilCAM/functions1D/exponential"
       },
       {
         "displayName": "Staircase",
@@ -40,10 +40,25 @@
     ]
   },
   {
-    "group": "CC: Boolean",
+    "group": "CC: Complex Functions",
     "icon": "bezier-curve",
     "entries": [
-      
+      {
+        "displayName": "Union",
+        "path": "coilCAM/complexFunctions/union"
+      },
+      {
+        "displayName": "Difference",
+        "path": "coilCAM/complexFunctions/difference"
+      },
+      {
+        "displayName": "Custon Radius",
+        "path": "coilCAM/complexFunctions/customRadius"
+      },
+      {
+        "displayName": "Custon Profile",
+        "path": "coilCAM/complexFunctions/customProfile"
+      }
     ]
   },
   {
@@ -51,8 +66,12 @@
     "icon": "bezier-curve",
     "entries": [
       {
+        "displayName": "GCode Generator",
+        "path": "coilCAM/setup/gcodeGenerator"
+      },
+      {
         "displayName": "ToolpathUnitGenerator",
-        "path": "coilCAM/setup/ToolpathUnitGenerator"
+        "path": "coilCAM/setup/toolpathUnitGenerator"
       }
     ]
   },

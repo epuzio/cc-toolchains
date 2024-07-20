@@ -1,7 +1,7 @@
 import { html } from "lit-html";
 
 import {functions1D} from "coilcam/dist/main";
-const {exponential} = functions1D;
+const {exponential: ccExponential} = functions1D; //avoid naming conflict
 
 const config = {
   inports: {
@@ -47,17 +47,14 @@ const config = {
   },
 };
 
-function ccexponential(inports, outports){
-  // return null;
-  console.log("test");
-  console.log(exponential);
+function exponential(inports, outports){
     function inportsUpdated() {
         if(inports.base.value !== null && inports.amplitudeExponent.value !== null && inports.amplitude.value !== null && inports.nbPoints.value !== null){
-            outports.values.value = exponential(inports.base.value, inports.amplitudeExponent.value, inports.amplitude.value, inports.offset.value, inports.nbPoints.value,
-                inports.values0.value, inports.mode.value);
+            outports.values.value = ccExponential(inports.base.value, inports.amplitudeExponent.value, inports.amplitude.value, inports.offset.value, inports.nbPoints.value,
+              inports.values0.value, inports.mode.value);
         }  
     }
     return { inportsUpdated };
 }
 
-export default { config, tool: ccexponential};
+export default { config, tool: exponential};

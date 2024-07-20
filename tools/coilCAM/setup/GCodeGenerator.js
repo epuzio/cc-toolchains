@@ -1,5 +1,8 @@
 import { html } from "lit-html";
 
+import {setup} from "coilcam/dist/main";
+const {generateGCode} = setup;
+
 const config = {
     inports: {
         path: {
@@ -21,8 +24,8 @@ const config = {
     },
     outports: {
         path: { 
-        type: "gcode",
-        value: null,
+            type: "any",
+            value: null,
         },
     },
     ui: {
@@ -32,13 +35,14 @@ const config = {
     },
 };
 
-function generateGCode(inports, outports) {
+function GCodeGenerator(inports, outports) {
     function inportsUpdated() {
         if(inports.path.value !== null && inports.layerHeight.value !== null && inports.nozzleDiameter.value !== null && inports.printSpeed.value !== null){
-            // outports.path.value = 
+            outports.path.value = generateGCode(inports.path.value, inports.nozzleDiameter.value, inports.printSpeed.value);
         }  
     }
-    return { inportsUpdated };
+    return {inportsUpdated};
 }
+export default { config, tool: GCodeGenerator};
 
   
