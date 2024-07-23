@@ -15,7 +15,7 @@ const config = {
     },
     outports: {},
     ui: {
-      displayName: "CC-Renderer",
+      displayName: "CC-ToolpathViewer",
       width: 500,
       height: 500,
     },
