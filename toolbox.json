@@ -72,6 +72,10 @@
       {
         "displayName": "ToolpathUnitGenerator",
         "path": "coilCAM/setup/toolpathUnitGenerator"
+      },
+      {
+        "displayName": "Toolpath Viewer",
+        "path": "coilCAM/setup/toolpathViewer"
       }
     ]
   },

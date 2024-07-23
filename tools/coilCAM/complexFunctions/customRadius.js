@@ -1,27 +1,13 @@
 // Builds upon Path Drawing component, just adds a circle/alters nbPoints/radius
 import { html } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
+import { initial } from "lodash";
 
-const initialPaths = {
-  uniqueName: [
-    [
-      "circle",
-      [12, 30],
-      [3],
-    ],
-  ],
-  uniqueName: [
-    [
-      "circle",
-      [12, 12],
-      [7],
-    ],
-  ],
-}
+var initialPaths = {};
 
 
 
-const config = {
+var config = {
   inports: {
     bounds: {
       type: "domain2D",
@@ -39,37 +25,70 @@ const config = {
   outports: {
     paths: {
       type: "array",
-      value: [initialPaths[0], initialPaths[1]],
+      value: Object.values(initialPaths)
     },
   },
   state: { 
-    paths: initialPaths,
-    refPath: initialPaths[0],  // Adjust if needed
-    realPath: initialPaths[1]
+    paths: initialPaths
   },
   ui: {
-    displayName: "Path",
+    displayName: "Custom Radius",
     width: 500,
     height: 400,
     resize: "both",
   },
 };
 
+function setBKGCircle(radius){
+  return {
+    uniqueName1: [
+      [
+        "circle",
+        [12, 12],
+        [radius],
+      ],
+    ],
+    uniqueName2: [
+      [
+        "circle",
+        [4, 4],
+        [7],
+      ],
+    ],
+  }
+}
+
 function pathDrawing(inports, outports, state) {
   let pdiRef = createRef();
 
   let updateBounds;
 
-  function inportsUpdated() {
-    if(inports.radius.value !== null && nbPoints !== null){
-      updateBounds(inports.bounds.value);
-    }
-  }
-
   function setPaths(paths) {
     state.paths = paths;
     outports.paths.value = paths;
   }
+
+  //TODO: connect to outports
+  function inportsUpdated() {
+    // updateBounds(inports.bounds.value); //uncommenting causes bugs here, not in pathDrawing.js
+    // inports.radius.value = 5;
+    // inports.nbPoints.value = 10;
+    if(inports.radius.value !== null && inports.nbPoints.value !== null){
+      initialPaths = setBKGCircle(inports.radius.value);
+      state.paths = initialPaths;
+      outports.paths.value = initialPaths;
+      // setPoints(inports.nbPoints.value);
+      if(window.setPaths){
+        console.log("window set paths:", window.setPaths);
+        window.setPaths(initialPaths);
+      }
+      console.log(initialPaths);
+      console.log("outport path:", outports.paths.value, " <-");
+      console.log("state path:", state.paths, " <-");
+    }
+  }
+
+  
 
   function postInit() {
     let iframe = document.createElement("iframe");
@@ -78,6 +97,7 @@ function pathDrawing(inports, outports, state) {
     // outports.paths.value = state.paths;
 
     iframe.onload = () => {
+      console.log("loaded");
       let pWindow = iframe.contentWindow;
       pWindow.state.paths = state.paths;
       pWindow.setPaths = setPaths;

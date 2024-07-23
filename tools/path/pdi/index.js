@@ -152,7 +152,9 @@ const renderPts = (path, pathKey) => {
 
     if (type === "circle") {
       // Draw a reference circle
+      
       const [_, center, radius] = cmd;
+      console.log("drawing circle..", center[0], center[1]);
         result.push(svg`
         <circle
           cx=${center[0]}

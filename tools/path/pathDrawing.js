@@ -63,6 +63,7 @@ function pathDrawing(inports, outports, state) {
   }
 
   function setPaths(paths) {
+    console.log("set paths called");
     state.paths = paths;
     outports.paths.value = paths;
   }
