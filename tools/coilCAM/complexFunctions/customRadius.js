@@ -39,7 +39,7 @@ const config = {
   outports: {
     paths: {
       type: "array",
-      value: initialPaths[0],
+      value: [initialPaths[0], initialPaths[1]],
     },
   },
   state: { 
