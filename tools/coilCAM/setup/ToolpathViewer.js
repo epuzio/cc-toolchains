@@ -1,4 +1,6 @@
 // Builds upon code for path drawing
+//TODO: updating properly, but no changes in renderer?
+import { emacsStyleKeymap } from "@codemirror/commands";
 import { html, render, svg, nothing } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
 
@@ -22,9 +24,19 @@ const config = {
 };
   
 function toolpathViewer(inports, outports, state, global) {
+    let iframe;
     let pdiRef = createRef();
+
+    function inportsUpdated(){
+        if(inports.bedDimensions.value !== null && iframe){
+            iframe.contentWindow.state.bedDimensions = inports.bedDimensions.value;
+            console.log(iframe.contentWindow.state.bedDimensions);
+        } else{
+            iframe.contentWindow.state.bedDimensions = [];
+        }
+    }
     function postInit() {
-        let iframe = document.createElement("iframe");
+        iframe = document.createElement("iframe");
         iframe.src = "./tools/coilCAM/setup/toolpathViewer/index.html";
     
         iframe.onload = () => {
@@ -53,7 +65,7 @@ function toolpathViewer(inports, outports, state, global) {
             </style>
             <div id="pdi" ${ref(pdiRef)}></div>`;
         }
-    return {render, postInit};
+    return {render, postInit, inportsUpdated};
 }
   
   
