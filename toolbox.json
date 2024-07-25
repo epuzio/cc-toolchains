@@ -76,6 +76,14 @@
       {
         "displayName": "Toolpath Viewer",
         "path": "coilCAM/setup/toolpathViewer"
+      },
+      {
+        "displayName": "test path",
+        "path": "coilCAM/setup/testPath"
+      },
+      {
+        "displayName": "test path 2",
+        "path": "coilCAM/setup/testPath2"
       }
     ]
   },

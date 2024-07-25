@@ -1,7 +1,6 @@
 // Builds upon code for path drawing
-//TODO: updating properly, but no changes in renderer?
-import { emacsStyleKeymap } from "@codemirror/commands";
-import { html, render, svg, nothing } from "lit-html";
+//TODO: debug displaying path in renderer
+import { html } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
 
 const config = {
@@ -10,10 +9,14 @@ const config = {
             type: "array",
             value: null,
         },
+        referencePath: { 
+            type: "array",
+            value: null,
+        },
         bedDimensions: { //potterbot bed dimensions, should default to baby_pb
             type: "array",
             value: null,
-        }
+        },
     },
     outports: {},
     ui: {
@@ -28,22 +31,26 @@ function toolpathViewer(inports, outports, state, global) {
     let pdiRef = createRef();
 
     function inportsUpdated(){
-        if(inports.bedDimensions.value !== null && iframe){
+        if(inports.bedDimensions.value !== null){
             iframe.contentWindow.state.bedDimensions = inports.bedDimensions.value;
-            console.log(iframe.contentWindow.state.bedDimensions);
-        } else{
-            iframe.contentWindow.state.bedDimensions = [];
         }
+        if(inports.path.value !== null){
+            iframe.contentWindow.state.path = inports.path.value;
+        }
+        if(inports.referencePath.value !== null){
+            iframe.contentWindow.state.referencePath = inports.referencePath.value;
+        }
+
     }
     function postInit() {
         iframe = document.createElement("iframe");
         iframe.src = "./tools/coilCAM/setup/toolpathViewer/index.html";
     
-        iframe.onload = () => {
-          let pWindow = iframe.contentWindow;
-          pWindow.state.paths = state.paths;
-          pWindow.setPaths = setPaths;
-        };
+        // iframe.onload = () => {
+        //   let pWindow = iframe.contentWindow;
+        //   pWindow.state.paths = state.paths;
+        //   pWindow.setPaths = setPaths;
+        // };
     
         pdiRef.value.appendChild(iframe);
     }
