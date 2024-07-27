@@ -1,7 +1,8 @@
 import { html } from "lit-html";
 
-import {setup} from "coilcam/dist/main";
-const {generateGCode} = setup;
+import * as setup from "coilcam/dist/main";
+console.log("set", setup);
+const generateGCode = setup;
 
 const config = {
     inports: {
