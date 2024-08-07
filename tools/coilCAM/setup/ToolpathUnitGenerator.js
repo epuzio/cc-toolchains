@@ -140,7 +140,7 @@ function tug(position, initialRadius, layerHeight, nbLayers, nbPointsInLayer,
                 x: (position[0] + (initialRadius + srsp[j] * radsp[(nbLayers*j)+i] + ssp[j]) * Math.cos(angle + (rsp[j] * Math.PI/180)) + tsp[0][j]),
                 y: (position[1] + (initialRadius + srsp[j] * radsp[(nbLayers*j)+i] + ssp[j]) * Math.sin(angle + (rsp[j] * Math.PI/180)) + tsp[1][j]),
                 z: (position[2] + layerHeight * j),
-                thickness: (thsp[(nbLayers*j)+i]+lthsp[j])
+                t: (thsp[(nbLayers*j)+i]+lthsp[j])
             }
             path.push(newPoint);
         }

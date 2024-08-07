@@ -70,8 +70,8 @@ function createPrinterBed(scene, dimensions){
 
 function cylinderFromPoints(pointStart, pointEnd, group, material){
     //convert to Vec3
-    let pointStartVec = new THREE.Vector3(pointStart[0], pointStart[1], pointStart[2]);
-    let pointEndVec = new THREE.Vector3(pointEnd[0], pointEnd[1], pointEnd[2]);
+    let pointStartVec = new THREE.Vector3(pointStart.x, pointStart.y, pointStart.z);
+    let pointEndVec = new THREE.Vector3(pointEnd.x, pointEnd.y, pointEnd.z);
 
     var dir = new THREE.Vector3().subVectors(pointEndVec, pointStartVec);
     var quat = new THREE.Quaternion();
@@ -80,7 +80,7 @@ function cylinderFromPoints(pointStart, pointEnd, group, material){
     var offset = new THREE.Vector3(); //midpoint of cylinder
     offset.addVectors(pointEndVec, pointStartVec).divideScalar(2);
     
-    const segmentGeometry = new THREE.CylinderGeometry(pointEnd[3]+1, pointStart[3]+1, dir.length(), 8);
+    const segmentGeometry = new THREE.CylinderGeometry(pointEnd.t+1, pointStart.t+1, dir.length(), 8);
     const segment = new THREE.Mesh(segmentGeometry, material); 
     segment.quaternion.copy(quat);
     segment.position.set(offset.x, offset.y, offset.z);
@@ -91,15 +91,6 @@ function createPath(scene, path, pathType){
     if(path.length === 0){
         return;
     }
-    //A little hack-y: three.js does not offer a line thickness property (neither does webGL)
-    //so to alter the thickness of points along the toolpath, render each segment as a cylinder.
-
-    //Also, ToolpathUnitGenerator still outputs array of floats, workaround to convert to [[x, y, z, thickness], ...]
-    //TODO: make ToolpathUnitGenerator in coilcam-lib output objects with x, y, z, thickness parameters (more robust)
-    let numPts = 4; 
-    path = Array.from({ length: path.length / numPts }, (v, i) =>
-        path.slice(i * numPts, i * numPts + numPts)
-      );
 
     const toolpath = new THREE.Group(); //group for printer bed
     var material;
@@ -112,11 +103,10 @@ function createPath(scene, path, pathType){
         material = new THREE.MeshToonMaterial( {color: 0x0091c2} ); 
     }
     
-    
     for(let i = 0; i < path.length - 1; i++){
         cylinderFromPoints(path[i], path[i+1], toolpath, material);
     }
-    toolpath.scale.set(.1, .1, .1); //scale relative to printer bed
+    toolpath.scale.set(.1, .1, .1); //scale relative to printer bed, 10 3js = 1m
     scene.add(toolpath);
 }
 
