@@ -1,171 +1,298 @@
-// referencing https://threejs.org/docs/index.html?q=camera#manual/en/introduction/Creating-a-scene
+//copied from coilCAM-js toolpath viewer
+
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
-var global_state = {
-    path: [],
-    referencePath: [],
-    bedDimensions: []
-};
-window.state = global_state;
+export default class ToolpathViewer {
+    scene;
+    camera;
+    renderer;
+    TPVcontainer;
+    controls;
+    transformControls;
+    raycaster;
+    defaultPath; //stores current path inside TPV, check against global state path to monitor for changes
+    defaultReferencePath;
+    defaultBedDimensions = [28.0, 26.5, 30.5]; // 1 3js = 10 mm
+    globalState = { //variables updatable outside toolpathviewer
+        path: [],
+        referencePath: [],
+        bedDimensions: [28.0, 26.5, 30.5],
+        outputPath: [] //return this
+    };
+    baseHeight = 1; //height for base of printer bed (constant)
+    dragPoints; //store the editable points
+    hoverOver = false; // check whether mouse is hovering over object
+    uuidToPoint = new Map(); //maps the uuid of each draggable point to its index in the toolpath group
+    
+    cylinderMaterial = new THREE.MeshToonMaterial({color: 0x000000});
+    cylinderReferenceMaterial = new THREE.MeshToonMaterial({color: 0x0091c2}); 
+    cylinderHighlightMaterial = new THREE.MeshToonMaterial({color: 0x826f63});
+    highlightedMaterials = false; // check whether materials are currently highlighted
 
-let defaultDimensions = [28, 26.5, 30.5]; //baby potterbot, 1 3js = 10mm
-global_state.bedDimensions = defaultDimensions;
-let defaultPath, defaultReferencePath = null; 
-const baseHeight = 1; //base of printer bed
+    constructor(TPVcontainer) {
+        this.TPVcontainer = TPVcontainer;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.defaultPath = this.globalState.path;
+        this.defaultReferencePath = this.globalState.referencePath;
+        window.state = this.globalState;
+        this.initScene();
+        
+        this.dragPoints = new THREE.Group(); // store editable spheres in threejs group
+        this.dragPoints.name = "circles";
+        this.scene.add(this.dragPoints);
+        this.raycaster = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+        
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
+        // this.scene.add(this.controls);
+        // this.scene.add(this.transformControls.getHelper());
 
-// Build Scene
-const scene = new THREE.Scene();
-scene.background = new THREE.Color( {color : 0xfaead6}); //colors from styles.css for pathDrawing
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.up.set(0, 0, 1); // to ensure z is up and down instead of default (y)
-camera.position.set(2, 20, 40);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setAnimationLoop(animate);
-document.body.appendChild(renderer.domElement);
-const controls = new OrbitControls(camera, renderer.domElement);
+        document.body.appendChild(this.renderer.domElement);
+        window.addEventListener("resize", this.onWindowResize.bind(this));
+        window.addEventListener('pointermove', this.onPointerMove.bind(this));
+        document.body.addEventListener('pointerdown', this.pointerDown.bind(this));
+        document.body.addEventListener('pointerup', this.pointerUp.bind(this));
+    }
 
-function createPrinterBedLines(dimensions, baseHeight, material){ //make line building a little less repetitive
-    const lines = []; 
-    const offsets = [[1, 1], [1, -1], [-1, -1], [-1, 1]]; 
-    for(let i = 0; i < 8; i++){
-        const points = [];
-        if(i < 4){
-            points.push(new THREE.Vector3(dimensions[0]/2 * offsets[i][0], dimensions[1]/2 * offsets[i][1], baseHeight/2 + dimensions[2]));
-            points.push(new THREE.Vector3(dimensions[0]/2 * offsets[i][0], dimensions[1]/2 * offsets[i][1], baseHeight/2));
-        } else{
-            points.push(new THREE.Vector3(dimensions[0]/2 * offsets[i%4][0], dimensions[1]/2 * offsets[i%4][1], baseHeight/2 + dimensions[2]));
-            points.push(new THREE.Vector3(dimensions[0]/2 * offsets[(i+1)%4][0], dimensions[1]/2 * offsets[(i+1)%4][1], baseHeight/2 + dimensions[2]));
+    pointerUp(){
+        if(this.transformControls.object){
+            this.transformControls.object.material = this.cylinderMaterial;
+            this.controls.enabled = true;
+            this.transformControls.detach();
+            window.state.outputPath = this.globalState.path;
+            // window.parent.postMessage({message:"update-outputPath"}, '*'); // update TPV when dragend finished
+        };
+    }
+
+    pointerDown(){
+        if(this.transformControls.object){
+            this.controls.enabled = false; 
         }
-        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-        const line = new THREE.Line( geometry, material );
-        lines.push(line);
     }
-    return lines;
+
+    onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    onPointerMove(event) { 
+        this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+        this.raycaster.setFromCamera( this.pointer, this.camera );
+        
+        const intersects = this.raycaster.intersectObjects(this.dragPoints.children, true );
+        this.hoverOver = intersects.length > 0;
+        if (this.hoverOver) {
+            const object = intersects[ 0 ].object;
+            if ( object !== this.transformControls.object ) {
+                this.transformControls.attach(object);
+            }
+        } 
+    }
+
+    //initialize 3js elements
+    initScene(){
+        this.scene.background = new THREE.Color(0xe3e1de);
+        this.camera.up.set(0, 0, 1); // to ensure z is up and down instead of default (y)
+        this.camera.position.set(-2, -20, 30);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setAnimationLoop(this.animate.bind(this));
+        this.createPrinterBed(this.scene, this.globalState.bedDimensions);
+        this.createPath(this.scene, this.globalState.path);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.z = 3;
+        this.scene.add(directionalLight);
+    }
+
+    createPrinterBedLines(dimensions, material){ //make line building a little less repetitive
+        const lines = []; 
+        const offsets = [[1, 1], [1, -1], [-1, -1], [-1, 1]]; 
+        for(let i = 0; i < 8; i++){
+            const points = [];
+            if(i < 4){
+                points.push(new THREE.Vector3(-dimensions[0]/2 * offsets[i][0], dimensions[1]/2 * offsets[i][1], this.baseHeight/2 + dimensions[2]));
+                points.push(new THREE.Vector3(-dimensions[0]/2 * offsets[i][0], dimensions[1]/2 * offsets[i][1], this.baseHeight/2));
+            } else{
+                points.push(new THREE.Vector3(-dimensions[0]/2 * offsets[i%4][0], dimensions[1]/2 * offsets[i%4][1], this.baseHeight/2 + dimensions[2]));
+                points.push(new THREE.Vector3(-dimensions[0]/2 * offsets[(i+1)%4][0], dimensions[1]/2 * offsets[(i+1)%4][1], this.baseHeight/2 + dimensions[2]));
+            }
+            const geometry = new THREE.BufferGeometry().setFromPoints( points );
+            const line = new THREE.Line( geometry, material );
+            lines.push(line);
+        }
+        return lines;
+    }
+
+    // Create printer bed based on user dimensions - default to baby potterbot dimensions
+    createPrinterBed(scene, dimensions){
+        const printerBed = new THREE.Group(); //group for printer bed
+        const printerBedBorders = new THREE.Group(); //group for borders, require different update function
+        printerBedBorders.name = "printerBedBorders";
+        printerBed.name = "printerBed";
+
+        const baseGeometry = new THREE.BoxGeometry(dimensions[0], dimensions[1], this.baseHeight);
+        const baseMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } ); 
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.name = "printerBedBase";
+        printerBed.add(base);
+        
+        const bordersMaterial = new THREE.MeshToonMaterial( { color: 0xfaead6 } ); //borders of printer bed
+        const bordersGeometry = this.createPrinterBedLines(dimensions, bordersMaterial);
+        for(const line of bordersGeometry){
+            printerBedBorders.add(line);
+        }
+        printerBed.add(printerBedBorders);
+        printerBed.position.set(dimensions[0]/2, dimensions[1]/2, -this.baseHeight/2);
+        scene.add(printerBed);
+    }
+
+    //helper function to convert line segment to cylinder (for thickness)
+    //note: built in ThreeJS function lineWidth() will not render any width other than 1
+    cylinderFromPoints(pointStart, pointEnd, material, dragPointThickness=0){
+        let pointStartThickness = dragPointThickness;
+        let pointEndThickness = dragPointThickness;
+        if(!pointStart.isVector3){ //convert to Vec3
+            pointStartThickness = pointStart.t;
+            pointStart = new THREE.Vector3(pointStart.x, pointStart.y, pointStart.z); 
+        }
+        if(!pointEnd.isVector3){
+            pointEndThickness = pointEnd.t;
+            pointEnd = new THREE.Vector3(pointEnd.x, pointEnd.y, pointEnd.z);
+        }
+
+        var dir = new THREE.Vector3().subVectors(pointEnd, pointStart);
+        var quat = new THREE.Quaternion();
+        quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); 
+
+        var offset = new THREE.Vector3(); //midpoint of cylinder
+        offset.addVectors(pointEnd, pointStart).divideScalar(2);
+        
+        const segmentGeometry = new THREE.CylinderGeometry(pointEndThickness+1, pointStartThickness+1, dir.length(), 8);
+        const segment = new THREE.Mesh(segmentGeometry, material); 
+        segment.quaternion.copy(quat);
+        segment.position.set(offset.x, offset.y, offset.z);
+        return segment;
+    }
+
+    createPath(scene, path, pathType){
+        if(path.length === 0){
+            return;
+        }
+        let circleGeometry = new THREE.SphereGeometry(1, 16, 16); 
+        
+        const toolpath = new THREE.Group(); //group for printer bed
+        var material;
+        if(pathType == "path"){
+            toolpath.name = "path";
+            material = this.cylinderMaterial;
+        }
+        if(pathType == "referencePath"){
+            toolpath.name = "referencePath";
+            material = this.cylinderReferenceMaterial;
+        }
+        for(let i = 0; i < path.length ; i++){
+            const dragPoint = new THREE.Mesh(circleGeometry, this.cylinderMaterial); 
+            dragPoint.position.set(path[i].x, path[i].y, path[i].z);
+            let dragPointRadius = 2 + path[i].t; //dragpoint radius proportional to thickness - hard to grab extremely thin points
+            dragPoint.scale.set(dragPointRadius, dragPointRadius, dragPointRadius);
+            this.dragPoints.add(dragPoint);
+
+            if(i != path.length - 1){
+                toolpath.add(this.cylinderFromPoints(path[i], path[i+1], material));
+            }
+            this.uuidToPoint.set(dragPoint.uuid, i);
+        }
+
+        this.dragPoints.scale.set(.1, .1, .1);
+        toolpath.scale.set(.1, .1, .1); //scale relative to printer bed, 10 3js = 1m
+        scene.add(toolpath);
+        window.state.outputPath = path;
+    }
+
+    // Change toolpath on update
+    refreshPath(scene, pathType){
+        const toolpath = scene.getObjectByName(pathType); 
+        scene.remove(toolpath);
+        const circles = scene.getObjectByName("circles"); 
+        circles.clear();
+
+        if(pathType === "path" && this.globalState.path.length != 0){
+            this.createPath(scene, this.globalState.path, pathType);
+            this.defaultPath = this.globalState.path;
+        }
+        if(pathType === "referencePath" && this.globalState.referencePath.length != 0){
+            this.createPath(scene, this.globalState.referencePath, pathType);
+            this.defaultReferencePath = this.globalState.referencePath;
+        }
+    }
+
+    // Update viewer on camera shift, changes in dimensions/toolpath
+    animate() {
+        this.controls.update();
+        // this.transformControls.update();
+        this.renderer.render(this.scene, this.camera);
+        if(JSON.stringify(this.globalState.bedDimensions) !== JSON.stringify(this.defaultBedDimensions) && this.globalState.bedDimensions.length !== 0){
+            var borders = this.scene.getObjectByName("printerBedBorders");  //update borders
+            borders.scale.set(this.globalState.bedDimensions[0]/(this.defaultBedDimensions[0]), 
+                this.globalState.bedDimensions[1]/(this.defaultBedDimensions[1]), 
+                this.globalState.bedDimensions[2]/(this.defaultBedDimensions[2]));
+
+            var base = this.scene.getObjectByName("printerBedBase"); //update base (don't scale z)
+            base.scale.set(this.globalState.bedDimensions[0]/(this.defaultBedDimensions[0]), 
+                this.globalState.bedDimensions[1]/(this.defaultBedDimensions[1]), 
+                1);
+            this.defaultBedDimensions = this.globalState.bedDimensions;
+            var printerBed = this.scene.getObjectByName("printerBed"); //reposition group
+            printerBed.position.set(-(this.globalState.bedDimensions[0]/20), -this.globalState.bedDimensions[1]/20, -this.baseHeight/2);
+        }
+        if(this.globalState.path != this.defaultPath){ //execute only on path update, delete and rebuild toolpath
+            this.refreshPath(this.scene, "path");
+        }
+        if(this.globalState.referencePath != this.defaultReferencePath){ //execute only on path update, delete and rebuild toolpath
+            this.refreshPath(this.scene, "referencePath");
+        }
+
+        let toolpath = this.scene.getObjectByName("path");
+        if(this.transformControls.dragging){ //run if dragging point along the toolpath
+            let dragPoint = this.transformControls.object;
+            let index = this.uuidToPoint.get(dragPoint.uuid);
+            let cylinderIDs = [index-1, index];
+            
+            for(let i = 0; i < cylinderIDs.length; i++){
+                if(cylinderIDs[i] < 0 || cylinderIDs[i] >= toolpath.children.length){
+                    continue;
+                }
+                let obj = toolpath.children[cylinderIDs[i]];
+                let newCylinder = i == 0 ? //create a new cylinder with endpoints at the current dragPoint
+                    this.cylinderFromPoints(this.globalState.path[cylinderIDs[i]], dragPoint.position, this.cylinderHighlightMaterial, this.globalState.path[cylinderIDs[i+1]].t) : 
+                    this.cylinderFromPoints(dragPoint.position, this.globalState.path[cylinderIDs[i]+1], this.cylinderHighlightMaterial, this.globalState.path[cylinderIDs[i]].t);
+                obj.copy(newCylinder);
+
+                //update the endpoints of the neighboring cylinder
+                this.globalState.path[index].x = dragPoint.position.x; 
+                this.globalState.path[index].y = dragPoint.position.y;
+                this.globalState.path[index].z = dragPoint.position.z; 
+                this.highlightedMaterials = true;
+            }
+        } else{
+            if(this.highlightedMaterials){
+                for(let c of toolpath.children){ //set all toolpath cylinders to black
+                    c.material = this.cylinderMaterial;
+                }
+                this.highlightedMaterials = false;
+            }
+        }
+    }
 }
+window.ToolpathViewer = ToolpathViewer;
 
-// Create printer bed based on user dimensions - default to baby potterbot dimensions
-function createPrinterBed(scene, dimensions){
-    const printerBed = new THREE.Group(); //group for printer bed
-    const printerBedBorders = new THREE.Group(); //group for borders, require different update function
-    printerBedBorders.name = "printerBedBorders";
-    printerBed.name = "printerBed";
-
-    const baseGeometry = new THREE.BoxGeometry(dimensions[0], dimensions[1], baseHeight);
-    const baseMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } ); 
-    const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.name = "printerBedBase";
-    printerBed.add(base);
-    
-    const bordersMaterial = new THREE.MeshToonMaterial( { color: 0xfaead6 } ); //borders of printer bed
-    const bordersGeometry = createPrinterBedLines(dimensions, baseHeight, bordersMaterial);
-    for(const line of bordersGeometry){
-        printerBedBorders.add(line);
-    }
-    printerBed.add(printerBedBorders);
-    printerBed.position.set(-dimensions[0]/2, -dimensions[1]/2, -baseHeight/2);
-    scene.add(printerBed);
-}
-
-function cylinderFromPoints(pointStart, pointEnd, group, material){
-    //convert to Vec3
-    let pointStartVec = new THREE.Vector3(pointStart[0], pointStart[1], pointStart[2]);
-    let pointEndVec = new THREE.Vector3(pointEnd[0], pointEnd[1], pointEnd[2]);
-
-    var dir = new THREE.Vector3().subVectors(pointEndVec, pointStartVec);
-    var quat = new THREE.Quaternion();
-    quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()); 
-
-    var offset = new THREE.Vector3(); //midpoint of cylinder
-    offset.addVectors(pointEndVec, pointStartVec).divideScalar(2);
-    
-    const segmentGeometry = new THREE.CylinderGeometry(pointEnd[3]+1, pointStart[3]+1, dir.length(), 8);
-    const segment = new THREE.Mesh(segmentGeometry, material); 
-    segment.quaternion.copy(quat);
-    segment.position.set(offset.x, offset.y, offset.z);
-    group.add(segment);
-}
-
-function createPath(scene, path, pathType){
-    if(path.length === 0){
-        return;
-    }
-    //A little hack-y: three.js does not offer a line thickness property (neither does webGL)
-    //so to alter the thickness of points along the toolpath, render each segment as a cylinder.
-
-    //Also, ToolpathUnitGenerator still outputs array of floats, workaround to convert to [[x, y, z, thickness], ...]
-    //TODO: make ToolpathUnitGenerator in coilcam-lib output objects with x, y, z, thickness parameters (more robust)
-    let numPts = 4; 
-    path = Array.from({ length: path.length / numPts }, (v, i) =>
-        path.slice(i * numPts, i * numPts + numPts)
-      );
-
-    const toolpath = new THREE.Group(); //group for printer bed
-    var material;
-    if(pathType == "path"){
-        toolpath.name = "path";
-        material = new THREE.MeshToonMaterial( {color: 0x212121} ); 
-    }
-    if(pathType == "referencePath"){
-        toolpath.name = "referencePath";
-        material = new THREE.MeshToonMaterial( {color: 0x0091c2} ); 
-    }
-    
-    
-    for(let i = 0; i < path.length - 1; i++){
-        cylinderFromPoints(path[i], path[i+1], toolpath, material);
-    }
-    toolpath.scale.set(.1, .1, .1); //scale relative to printer bed
-    scene.add(toolpath);
-}
-
-function refreshPath(pathType){
-    const toolpath = scene.getObjectByName(pathType); 
-    scene.remove(toolpath);
-    if(pathType === "path" && global_state.path.length != 0){
-        createPath(scene, global_state.path, pathType);
-        defaultPath = global_state.path;
-    }
-    if(pathType === "referencePath" && global_state.referencePath.length != 0){
-        createPath(scene, global_state.referencePath, pathType);
-        defaultReferencePath = global_state.referencePath;
-    }
-}
-
-
-
-// Build Scene
-createPrinterBed(scene, global_state.bedDimensions);
-createPath(scene, global_state.path);
-const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
-directionalLight.position.z = 3
-scene.add(directionalLight);
-
-function animate() {
-    controls.update();
-	renderer.render( scene, camera );
-    if(global_state.bedDimensions != defaultDimensions && global_state.bedDimensions.length !== 0){ //execute only on update to bedDimensions inport
-        var borders = scene.getObjectByName("printerBedBorders");  //update borders
-        borders.scale.set(global_state.bedDimensions[0]/(defaultDimensions[0]*10), 
-            global_state.bedDimensions[1]/(defaultDimensions[1]*10), 
-            global_state.bedDimensions[2]/(defaultDimensions[2]*10));
-
-        var base = scene.getObjectByName("printerBedBase"); //update base (don't scale z)
-        base.scale.set(global_state.bedDimensions[0]/(defaultDimensions[0]*10), 
-            global_state.bedDimensions[1]/(defaultDimensions[1]*10), 
-            1);
-
-        var printerBed = scene.getObjectByName("printerBed"); //reposition group
-        printerBed.position.set(-global_state.bedDimensions[0]/20, -global_state.bedDimensions[1]/20, -baseHeight/2);
-    }
-    // console.log("global_state.path", global_state.path);
-    // console.log("defaultPath", defaultPath);
-    if(global_state.path !== defaultPath){ //execute only on path update, delete and rebuild toolpath
-        refreshPath("path");
-    }
-    if(global_state.referencePath !== defaultReferencePath){ //execute only on path update, delete and rebuild toolpath
-        refreshPath("referencePath");
-    }
-}
-    
+window.addEventListener('DOMContentLoaded', () => {
+    const TPVcontainer = document.getElementById('toolpathVieweriFrame'); // select the div
+    const TPV = new ToolpathViewer(TPVcontainer);
+});

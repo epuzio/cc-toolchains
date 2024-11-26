@@ -14,7 +14,7 @@ const config = {
         value: null,
     },
     offset: {
-        type: "any", //check
+        type: "number", //check
         value: null,
     },
     nbPoints: {
@@ -26,7 +26,7 @@ const config = {
         value: null,
     },
     mode: {
-        type: "number",
+        type: "string",
         value: null,
     },
   },
@@ -43,14 +43,15 @@ const config = {
   },
 };
 
-function sinusoidal(inports, outports) { //for now, resemble constants
+function sinusoidal(inports, outports) {
     function inportsUpdated() {
         if (inports.amplitude.value !== null && inports.period.value !== null && inports.nbPoints.value !== null) {
             outports.values.value = ccSinusoidal(inports.amplitude.value, inports.period.value, inports.offset.value, inports.nbPoints.value,
-                inports.values0.value, inports.mode.value);
+              0, inports.mode.value);
         }
+        console.log(ccSinusoidal(inports.amplitude.value, inports.period.value, inports.offset.value, 40, 0, ""));
     }
-    return {inportsUpdated};
+    return { inportsUpdated };
 }
 
 

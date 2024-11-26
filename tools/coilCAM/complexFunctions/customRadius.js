@@ -4,35 +4,35 @@ import { ref, createRef } from "lit-html/directives/ref.js";
 import { initial } from "lodash";
 
 var initialPaths = {};
-
+// function updateLayer(radius, nbPointsInLayer, pos=[0, 0, 0]){
 
 
 var config = {
   inports: {
-    bounds: {
-      type: "domain2D",
-      value: null,
-    },
     radius:{
       type: "number",
       value: null,
     },
-    nbPoints: {
+    nbPointsInLayer: {
       type: "number",
+      value: null,
+    },
+    position: {
+      type: "array",
       value: null,
     },
   },
   outports: {
     paths: {
       type: "array",
-      value: Object.values(initialPaths)
+      value: null
     },
   },
   state: { 
     paths: initialPaths
   },
   ui: {
-    displayName: "Custom Radius",
+    displayName: "CC-CustomRadius",
     width: 500,
     height: 400,
     resize: "both",

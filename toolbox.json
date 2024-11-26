@@ -66,24 +66,20 @@
     "icon": "bezier-curve",
     "entries": [
       {
-        "displayName": "GCode Generator",
-        "path": "coilCAM/setup/gcodeGenerator"
-      },
-      {
         "displayName": "ToolpathUnitGenerator",
-        "path": "coilCAM/setup/toolpathUnitGenerator"
+        "path": "coilCAM/setup/ToolpathUnitGenerator"
       },
       {
         "displayName": "Toolpath Viewer",
-        "path": "coilCAM/setup/toolpathViewer"
+        "path": "coilCAM/setup/ToolpathViewer"
       },
       {
-        "displayName": "test path",
-        "path": "coilCAM/setup/testPath"
+        "displayName": "GCode Generator",
+        "path": "coilCAM/setup/GCodeGenerator"
       },
       {
-        "displayName": "test path 2",
-        "path": "coilCAM/setup/testPath2"
+        "displayName": "Center Print",
+        "path": "coilCAM/setup/centerPrint"
       }
     ]
   },

@@ -18,13 +18,27 @@ const config = {
             value: null,
         },
     },
-    outports: {},
+    outports: {
+        path: { 
+          type: "any",
+          value: [],
+        },
+      },
     ui: {
       displayName: "CC-ToolpathViewer",
       width: 500,
       height: 500,
     },
 };
+
+function setOutputPath(outports, outputPath) {
+    if (outputPath && outports.path) {
+        outports.path.value = outputPath;
+    } else {
+        console.error("outports.paths is not defined.");
+    }
+}
+
   
 function toolpathViewer(inports, outports, state, global) {
     let iframe;
@@ -40,18 +54,12 @@ function toolpathViewer(inports, outports, state, global) {
         if(inports.referencePath.value !== null){
             iframe.contentWindow.state.referencePath = inports.referencePath.value;
         }
-
+        setOutputPath(outports, iframe.contentWindow.state?.outputPath);
     }
     function postInit() {
         iframe = document.createElement("iframe");
         iframe.src = "./tools/coilCAM/setup/toolpathViewer/index.html";
-    
-        // iframe.onload = () => {
-        //   let pWindow = iframe.contentWindow;
-        //   pWindow.state.paths = state.paths;
-        //   pWindow.setPaths = setPaths;
-        // };
-    
+
         pdiRef.value.appendChild(iframe);
     }
     function render() {
