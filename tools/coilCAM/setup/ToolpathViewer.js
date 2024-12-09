@@ -7,15 +7,15 @@ const config = {
     inports: {
         path: { 
             type: "array",
-            value: null,
+            value: [],
         },
         referencePath: { 
             type: "array",
-            value: null,
+            value: [],
         },
         bedDimensions: { //potterbot bed dimensions, should default to baby_pb
             type: "array",
-            value: null,
+            value: [280, 265, 305],
         },
     },
     outports: {
@@ -31,12 +31,15 @@ const config = {
     },
 };
 
+
+
 function setOutputPath(outports, outputPath) {
     if (outputPath && outports.path) {
         outports.path.value = outputPath;
     } else {
         console.error("outports.paths is not defined.");
     }
+    console.log("output:", outports.path.value);
 }
 
   
@@ -45,6 +48,7 @@ function toolpathViewer(inports, outports, state, global) {
     let pdiRef = createRef();
 
     function inportsUpdated(){
+        console.log("INPORT UPDATED)");
         if(inports.bedDimensions.value !== null){
             iframe.contentWindow.state.bedDimensions = inports.bedDimensions.value;
         }
@@ -56,6 +60,7 @@ function toolpathViewer(inports, outports, state, global) {
         }
         setOutputPath(outports, iframe.contentWindow.state?.outputPath);
     }
+
     function postInit() {
         iframe = document.createElement("iframe");
         iframe.src = "./tools/coilCAM/setup/toolpathViewer/index.html";

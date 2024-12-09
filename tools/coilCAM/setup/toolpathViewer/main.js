@@ -65,7 +65,7 @@ export default class ToolpathViewer {
             this.controls.enabled = true;
             this.transformControls.detach();
             window.state.outputPath = this.globalState.path;
-            // window.parent.postMessage({message:"update-outputPath"}, '*'); // update TPV when dragend finished
+            window.parent.postMessage({message:"update-outputPath"}, '*'); // update TPV when dragend finished
         };
     }
 

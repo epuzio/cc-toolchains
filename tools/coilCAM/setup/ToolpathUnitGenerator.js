@@ -25,27 +25,27 @@ const config = {
     },
     radiusSP: {
         type: "any",
-        value: null,
+        value: [],
     },
     scaleSP: {
         type: "any",
-        value: null,
+        value: [],
     },
     scalingSP: {
         type: "any",
-        value: null,
+        value: [],
     },
     translateSP: {
         type: "any",
-        value: null,
+        value: [],
     },
     rotateSP: {
         type: "any",
-        value: null,
+        value: [],
     },
     thicknessSP: {
         type: "any",
-        value: null,
+        value: [],
     },
   },
   outports: {

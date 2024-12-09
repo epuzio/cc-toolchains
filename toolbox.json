@@ -70,6 +70,10 @@
         "path": "coilCAM/setup/ToolpathUnitGenerator"
       },
       {
+        "displayName": "Toolpath Variables",
+        "path": "coilCAM/setup/ToolpathVariables"
+      },
+      {
         "displayName": "Toolpath Viewer",
         "path": "coilCAM/setup/ToolpathViewer"
       },

@@ -20,7 +20,7 @@
     "@codemirror/lint": "^6.2.0",
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.9.2",
-    "coilcam": "^1.0.44",
+    "coilcam": "^1.0.47",
     "flatten-js": "^0.6.9",
     "gh-pages": "^5.0.0",
     "json-beautify": "^1.1.1",

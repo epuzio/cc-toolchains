@@ -18,6 +18,10 @@ const config = {
         type: "array",
         value: null,
     },
+    layerHeight: {
+        type: "number",
+        value: null,
+    }
   },
   outports: {
     path: { 
@@ -34,8 +38,9 @@ const config = {
 
 function centerPrint(inports, outports) {
     function inportsUpdated() {
-        if (inports.path.value !== null && inports.position.value !== null) {
-            outports.path.value = ccCenterPrint(inports.path.value, inports.position.value, inports.bedDimensions.value);
+        if (inports.path.value !== null && inports.position.value !== null && inports.bedDimensions.value && inports.layerHeight.value) {
+            outports.path.value = ccCenterPrint(inports.path.value, inports.position.value, inports.bedDimensions.value, inports.layerHeight.value);
+            console.log("CCCenter print", ccCenterPrint(inports.path.value, inports.position.value, inports.bedDimensions.value));
         }
     }
     return {inportsUpdated};
