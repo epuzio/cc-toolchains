@@ -8,6 +8,10 @@
         "path": "coilCAM/functions1D/sinusoidal"
       },
       {
+        "displayName": "Sinusoidal Variables",
+        "path": "coilCAM/functions1D/sinusoidalVariables"
+      },
+      {
         "displayName": "Linear",
         "path": "coilCAM/functions1D/linear"
       },
@@ -239,6 +243,10 @@
     "icon": "computer-mouse",
     "entries": [
       {
+        "displayName": "Point",
+        "path": "inputs/point"
+      },
+      {
         "displayName": "Number Slider",
         "path": "inputs/inputSlider"
       },
@@ -251,8 +259,12 @@
         "path": "inputs/bool"
       },
       {
-        "displayName": "Point",
-        "path": "inputs/point"
+        "displayName": "Coilcam Function Mode",
+        "path": "inputs/mode"
+      },
+      {
+        "displayName": "Group",
+        "path": "inputs/group"
       }
     ]
   },

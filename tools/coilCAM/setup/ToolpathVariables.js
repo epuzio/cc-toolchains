@@ -9,26 +9,26 @@ const config = {
     },
     radius: {
         type: "number",
-        value: 50,
+        value: null,
     },
     layerHeight: {
         type: "number",
-        value: 2.5,
+        value: null,
     },
     nbLayers: {
         type: "number",
-        value: 20,
+        value: null,
     },
     nbPointsInLayer: {
         type: "number",
-        value: 5,
+        value: null,
     },
   },
   state: { 
     valueX: 0, valueY: 0.0, valueZ: 0.0, 
     radius: 50,
     layerHeight: 2.5,
-    nbLayers: 20,
+    nbLayers: 60,
     nbPointsInLayer: 5,
   },
   ui: {
