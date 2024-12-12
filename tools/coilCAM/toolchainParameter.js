@@ -1,6 +1,12 @@
 import { html } from "lit-html";
 
-export const parameter = (variableName, defaultValue, increments, outportVariable) =>{
+const increments = {
+    min: -9999999.0,
+    max: 9999999.0,
+    step: 1.0 //tofix: error where step increases to nearest whole number
+}
+
+export const parameter = (variableName, defaultValue, updatePorts) =>{
     return html`
     ${styles}
     <div id="variable-block-padding">
@@ -14,7 +20,7 @@ export const parameter = (variableName, defaultValue, increments, outportVariabl
                         .step=${increments.step}
                         .min=${increments.min}
                         .max=${increments.max}
-                        @change=${(e) => (outportVariable(Number(e.target.value)))} />
+                        @change=${(e) => (updatePorts(Number(e.target.value)))} />
                 </span>
             </div>
         </div>

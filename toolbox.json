@@ -24,8 +24,16 @@
         "path": "coilCAM/functions1D/staircase"
       },
       {
+        "displayName": "Staircase Variables",
+        "path": "coilCAM/functions1D/staircaseVariables"
+      },
+      {
         "displayName": "Square",
         "path": "coilCAM/functions1D/square"
+      },
+      {
+        "displayName": "Square Variables",
+        "path": "coilCAM/functions1D/squareVariables"
       }
     ]
   },

@@ -22,9 +22,7 @@ function text(inports, outports, state) {
     outports.text = e.target.value;
   }
 
-  const init = () => {
-    console.log("initializing!!");
-  };
+  const init = () => {};
 
   const render = () => {
     return html`<style>

@@ -19,29 +19,34 @@ const config = {
       value: 0,
     }
   },
-  state: {},
+  state: {
+    amplitude: 0.0,
+    period: 0.0,
+    offset: 0.0,
+  },
   ui: {
     displayName: "Sinusoidal Variables",
     width: 200,
-    height: 150,
+    height: 80,
   },
 };
 
 function sinusoidalVariables(inports, outports, state) {
-    const increments = {
-        min: -9999999.0,
-        max: 9999999.0,
-        step: 1.0 //tofix: error where step increases to nearest whole number
-    }
-
   function render() {
     return html`
-        ${parameter("Amplitude", outports.amplitude.value, increments, (value) => { outports.amplitude.value = value; })}
-        ${parameter("Period", outports.period.value, increments, (value) => { outports.period.value = value; })}
-        ${parameter("Offset", outports.offset.value, increments, (value) => { outports.offset.value = value; })}
+      ${parameter("Amplitude", state.amplitude, (value) => { 
+          state.amplitude = value; 
+          outports.amplitude.value = value; 
+      })}
+      ${parameter("Period", state.period, (value) => { 
+          state.period = value; 
+          outports.period.value = value; 
+      })}
+      ${parameter("Offset", state.offset, (value) => { 
+          state.offset = value;
+          outports.offset.value = value; })}
     `;
   }
-
   return { render };
 }
 
