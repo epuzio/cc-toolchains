@@ -46,27 +46,33 @@ scene.add(crossHorizontal);
 
 
 function calculateOffsets(){ // offset along the xy plane
-    window.state.values = vec3Points.map(point => Math.max(-position[2], position[2] - point.x));
+    window.state.values = vec3Points.map(point => (position[2] - point.x));
+    // Post message to update parent outports
+    window.parent.postMessage({ type: 'profileStateValuesUpdated', values: window.state.values }, window.location.origin);
 }
 
-function initializePath(layerHeight, nbLayers, pos=[0, 0, 0]){ //code repurposed from ToolpathUnitGenerator
+function initializePath(layerHeight, nbLayers, values, pos=[0, 0, 0]){ //code repurposed from ToolpathUnitGenerator
     //add vertical cross
     const crossVerticalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, layerHeight*nbLayers)]);
     const crossVertical = new THREE.Line(crossVerticalGeometry, crossMaterial);
     scene.add(crossVertical);
 
     //set camera proportional to radius
-    let circleGeometry = new THREE.CircleGeometry(layerHeight/2, 32 ); 
+    let circleGeometry = new THREE.CircleGeometry(layerHeight/3, 32 ); 
 
     //Make three-js group for adding draggable circle points
     position = pos;
     for(let i = 0; i < nbLayers; i++){
-        const point = { //point, toolpath notation
+        let point = { //point, toolpath notation
             x: 0,
             y: 0,
             z: layerHeight*i,
             t: 0
         }
+        if(values.length == nbLayers){
+            point.x = values[i];
+        }
+        
         //add draggable circle per point
         const circle = new THREE.Mesh(circleGeometry, circleMaterial ); 
         circle.position.set(point.x, point.y + yOffset, point.z);
@@ -89,12 +95,9 @@ function initializePath(layerHeight, nbLayers, pos=[0, 0, 0]){ //code repurposed
 
 // input values change
 function refreshPath(){
-    console.log("children", circleGroup.children);
     circleGroup.remove(...circleGroup.children);
-    console.log("children", [...circleGroup.children]);
-    scene.remove(scene.getObjectByName("lines"));
     if(global_state.nbLayers.length != 0 && global_state.layerHeight.length != 0){
-        initializePath(global_state.layerHeight, global_state.nbLayers);
+        initializePath(global_state.layerHeight, global_state.nbLayers, global_state.values);
         defaultLayerHeight = global_state.layerHeight;
         defaultNbLayers = global_state.nbLayers;
     }
@@ -103,8 +106,10 @@ function refreshPath(){
 function animate() {
 	renderer.render( scene, camera );
     zoomControls.update();
-    if(global_state.layerHeight != defaultLayerHeight || global_state.nbLayers != defaultNbLayers){ //execute only on path update, delete and rebuild toolpath
-        refreshPath();
+    if(global_state.layerHeight && global_state.nbLayers){
+        if(global_state.layerHeight != defaultLayerHeight || global_state.nbLayers != defaultNbLayers){ //execute only on path update, delete and rebuild toolpath
+            refreshPath();
+        }
     }
 }
 

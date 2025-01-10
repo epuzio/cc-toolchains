@@ -49,7 +49,7 @@ function sinusoidal(inports, outports) {
             outports.values.value = ccSinusoidal(inports.amplitude.value, inports.period.value, inports.offset.value, inports.nbPoints.value,
               inports.values0.value, inports.mode.value);
         }
-        console.log(ccSinusoidal(inports.amplitude.value, inports.period.value, inports.offset.value, inports.nbPoints.value, inports.values0.value, inports.mode.value));
+        // console.log(ccSinusoidal(inports.amplitude.value, inports.period.value, inports.offset.value, inports.nbPoints.value, inports.values0.value, inports.mode.value));
     }
     return { inportsUpdated };
 }

@@ -236,7 +236,9 @@ function toolpathVariables(inports, outports, state) {
                 .step=${increment.step}
                 .min=${increment.min}
                 .max=${increment.max}
-                @change=${(e) => (outports.radius.value = Number(e.target.value))} />
+                @change=${(e) => (
+                  state.radius = Number(e.target.value),
+                  outports.radius.value = Number(e.target.value))} />
             </span>
             </div>
         </div>
@@ -254,7 +256,9 @@ function toolpathVariables(inports, outports, state) {
                 .step=${increment.step}
                 .min=${increment.min}
                 .max=${increment.max}
-                @change=${(e) => (outports.layerHeight.value = Number(e.target.value))} />
+                @change=${(e) => (
+                  state.layerHeight = Number(e.target.value),
+                  outports.layerHeight.value = Number(e.target.value))} />
             </span>
             </div>
         </div>
@@ -272,7 +276,9 @@ function toolpathVariables(inports, outports, state) {
                 .step=${increment.step}
                 .min=${increment.min}
                 .max=${increment.max}
-                @change=${(e) => (outports.nbLayers.value = Number(e.target.value))} />
+                @change=${(e) => (
+                  state.nbLayers = Number(e.target.value),
+                  outports.nbLayers.value = Number(e.target.value))} />
             </span>
             </div>
         </div>
@@ -290,7 +296,9 @@ function toolpathVariables(inports, outports, state) {
                 .step=${increment.step}
                 .min=${increment.min}
                 .max=${increment.max}
-                @change=${(e) => (outports.nbPointsInLayer.value = Number(e.target.value))} />
+                @change=${(e) => (
+                  state.nbPointsInLayer = Number(e.target.value),
+                  outports.nbPointsInLayer.value = Number(e.target.value))} />
             </span>
             </div>
         </div>

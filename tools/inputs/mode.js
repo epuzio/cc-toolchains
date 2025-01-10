@@ -31,40 +31,47 @@ function functionMode(inports, outports, state) {
                 cursor: pointer;
             }
             #multiplicative-button-label {
-                background-color: ${state.mode ? darkblue : black};
+                background-color: ${state.mode ? black : darkblue};
                 width: 100px;
-                height: 100px;
+                height: 50px;
                 border-radius: 1rem;
-                padding: 1rem;
+                // padding: 1rem;
                 box-shadow: ${state.mode ? `inset 0 0 0 2px ${white}` : "none"};
                 outline: none;
                 cursor: pointer;
-                text-align: center;
-                vertical-align: middle;
+                display: flex;
+                justify-content: center;
+                align-items: center; 
+                color: white;
+                font-size: 60px;
             }
             #additive-button-label {
-                background-color: ${state.mode ? black : darkblue};
+                background-color: ${state.mode ? darkblue : black};
                 width: 100px;
-                height: 100px;
+                height: 50px;
                 border-radius: 1rem;
-                padding: 1rem;
+                // padding: 1rem;
                 box-shadow: ${!state.mode ? `inset 0 0 0 2px ${white}` : "none"};
                 outline: none;
                 cursor: pointer;
-                text-align: center;
-                vertical-align: middle;
+                display: flex;
+                justify-content: center;
+                align-items: center; 
+                color: white;
+                font-size: 60px;
             }
             .container {
                 display: flex;
                 justify-content: space-between; /* Space between the buttons */
                 align-items: center;
                 width: 100%; /* Adjust as needed */
+                text-align: center;
             }
         </style>
 
         <div class="container">
             <label id="multiplicative-button-label" for="multiplicative-button">
-                x
+                ×
             </label>
             <input
                 id="multiplicative-button"

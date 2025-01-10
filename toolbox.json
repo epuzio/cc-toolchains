@@ -96,6 +96,10 @@
       {
         "displayName": "Center Print",
         "path": "coilCAM/setup/centerPrint"
+      },
+      {
+        "displayName": "Spiralize",
+        "path": "coilCAM/setup/spiralize"
       }
     ]
   },
@@ -267,12 +271,8 @@
         "path": "inputs/bool"
       },
       {
-        "displayName": "Coilcam Function Mode",
+        "displayName": "Function Mode",
         "path": "inputs/mode"
-      },
-      {
-        "displayName": "Group",
-        "path": "inputs/group"
       }
     ]
   },

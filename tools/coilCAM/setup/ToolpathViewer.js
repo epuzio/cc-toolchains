@@ -39,7 +39,6 @@ function setOutputPath(outports, outputPath) {
     } else {
         console.error("outports.paths is not defined.");
     }
-    console.log("output:", outports.path.value);
 }
 
   
@@ -48,7 +47,6 @@ function toolpathViewer(inports, outports, state, global) {
     let pdiRef = createRef();
 
     function inportsUpdated(){
-        console.log("INPORT UPDATED)");
         if(inports.bedDimensions.value !== null){
             iframe.contentWindow.state.bedDimensions = inports.bedDimensions.value;
         }

@@ -3,11 +3,11 @@ import { ref, createRef } from "lit-html/directives/ref.js";
 
 const config = {
     inports: {
-        radius: { 
+        nbLayers: { 
             type: "number",
             value: null,
         },
-        nbPointsInLayer: { 
+        layerHeight: { 
             type: "number",
             value: null,
         },
@@ -24,7 +24,7 @@ const config = {
         offsets: []
     },
     ui: {
-      displayName: "CC-CustomRadius",
+      displayName: "CC-CustomProfile",
       width: 500,
       height: 500,
     },
@@ -44,29 +44,27 @@ function layerViewer(inports, outports, state, global) {
     let pdiRef = createRef();
 
     function inportsUpdated(){
-        if(inports.radius.value && inports.nbPointsInLayer.value){
-            state.nbPointsInLayer = inports.nbPointsInLayer.value;
-            state.radius = inports.radius.value;
+        if(inports.nbLayers.value && inports.layerHeight.value){
+            state.nbLayers = inports.nbLayers.value;
+            state.layerHeight = inports.layerHeight.value;
         }
-        iframe.contentWindow.state.nbPointsInLayer = state.nbPointsInLayer;
-        iframe.contentWindow.state.radius = state.radius;
+        iframe.contentWindow.state.nbLayers = state.nbLayers;
+        iframe.contentWindow.state.layerHeight = state.layerHeight;
 
-        // TO FIX: offsets should update from saved state.
-        // There is currently no function to convert from polar to cartesian offsets in layerViewer
         iframe.contentWindow.state.values = state.offsets;
         setOutputValues(outports, iframe.contentWindow.state?.values, state);
     }
 
     // Event listener to update outports when values update in 3js visualizer
     window.addEventListener('message', (event) => {
-        if (event.data.type === 'radiusStateValuesUpdated') {
+        if (event.data.type === 'profileStateValuesUpdated') {
             setOutputValues(outports, event.data.values, state);
         }
     });
 
     function postInit() {
         iframe = document.createElement("iframe");
-        iframe.src = "./tools/coilCAM/complexFunctions/layerViewer/layerViewer.html";
+        iframe.src = "./tools/coilCAM/complexFunctions/profileViewer/profileViewer.html";
         
         pdiRef.value.appendChild(iframe);
         iframe.onload = () => { // update visualizer from saved state onload
