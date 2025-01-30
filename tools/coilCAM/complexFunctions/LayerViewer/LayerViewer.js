@@ -20,6 +20,7 @@ scene.background = new THREE.Color( {color : 0xe3e1de}); //colors from styles.cs
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.up.set(0, 0, 1); // to ensure z is up and down instead of default (y)
 camera.position.set(0, 0, 40); //adjust z with radius?
+camera.rotation.y = Math.PI;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
@@ -45,8 +46,6 @@ var position;
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xc2bfba });
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
-directionalLight.position.z = 3
-scene.add(directionalLight);
 let vec3Points = [];
 let defaultVec3Points = []; //save starting vec3
 

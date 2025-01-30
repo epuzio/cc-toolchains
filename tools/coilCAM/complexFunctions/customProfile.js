@@ -11,6 +11,10 @@ const config = {
             type: "number",
             value: null,
         },
+        values0:{
+            type: "array",
+            value: null,
+        }
     },
     outports: {
         values: { 
@@ -21,7 +25,9 @@ const config = {
     state: { 
         radius: null,
         nbPointsInLayer: null,
-        offsets: []
+        offsets: [],
+        values0: [],
+        prevOffsets: []
     },
     ui: {
       displayName: "CC-CustomProfile",
@@ -33,6 +39,11 @@ const config = {
 function setOutputValues(outports, outputValues, state) {
     if (outputValues && outports.values) {
         state.offsets = outputValues;
+        if(state.values0){
+            state.prevOffsets = outputValues.map((offset, idx) => (offset - state.values0[idx]));
+        } else {
+            state.prevOffsets = outputValues;
+        }
         outports.values.value = outputValues;
     } else {
         console.error("outports.values is not defined.");
@@ -47,11 +58,12 @@ function layerViewer(inports, outports, state, global) {
         if(inports.nbLayers.value && inports.layerHeight.value){
             state.nbLayers = inports.nbLayers.value;
             state.layerHeight = inports.layerHeight.value;
+            state.values0 = inports.values0.value;
         }
         iframe.contentWindow.state.nbLayers = state.nbLayers;
         iframe.contentWindow.state.layerHeight = state.layerHeight;
-
-        iframe.contentWindow.state.values = state.offsets;
+        iframe.contentWindow.state.values0 = inports.values0.value;
+        iframe.contentWindow.state.prevOffsets = state.prevOffsets; 
         setOutputValues(outports, iframe.contentWindow.state?.values, state);
     }
 

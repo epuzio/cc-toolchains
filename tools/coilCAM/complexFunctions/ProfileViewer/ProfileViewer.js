@@ -7,18 +7,22 @@ var global_state = { // TO FIX: adding optional svg using file I/O
     svgPath: "",
     nbLayers: 0,
     layerHeight: 0.0,
-    values: [] //return this
+    values0: [], // passed in
+    prevOffsets: [], // passed in, stores previous user offsets
+    
+    values: [], // returned
 };
 window.state = global_state;
-let defaultNbLayers = 0;
-let defaultLayerHeight = 0;
+let prevNbLayers = 0;
+let prevLayerHeight = 0;
+let prevValues0 = [];
 
 // Build Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( {color : 0xe3e1de}); //colors from styles.css for pathDrawing
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.up.set(0, 0, 1); // to ensure z is up and down instead of default (y)
-camera.position.set(0, 40, 0); //adjust z with radius?
+camera.position.set(0, 40, 0); //adjust z with radius
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
@@ -29,6 +33,7 @@ const yOffset = 0;
 
 var circleGroup = new THREE.Group();
 circleGroup.name = "circleGroup";
+var lines;
 const circleMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } ); 
 const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: 0x85807b } ); 
 var position;
@@ -40,28 +45,54 @@ let vec3Points = [];
 
 //Add crosshair at position[x, y]
 const crossMaterial = new THREE.LineBasicMaterial({color: 0xc2bfba});
-const crossHorizontalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(5, 0, 0), new THREE.Vector3( 0, 0, 0)]);
+const crossHorizontalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-5, 0, 0), new THREE.Vector3(0, 0, 0)]);
 const crossHorizontal = new THREE.Line(crossHorizontalGeometry, crossMaterial);
 scene.add(crossHorizontal);
 
-
 function calculateOffsets(){ // offset along the xy plane
-    window.state.values = vec3Points.map(point => (position[2] - point.x));
+    window.state.values = vec3Points.map(point => (point.x - position[2]));
     // Post message to update parent outports
-    window.parent.postMessage({ type: 'profileStateValuesUpdated', values: window.state.values }, window.location.origin);
+    window.parent.postMessage({ type: 'profileStateValuesUpdated', values: window.state.values}, window.location.origin);
 }
 
-function initializePath(layerHeight, nbLayers, values, pos=[0, 0, 0]){ //code repurposed from ToolpathUnitGenerator
+function addLines(){
+    //draw lines from vec3
+    if(lines){
+        lines.geometry.dispose();
+        lines.material.dispose();
+        scene.remove(lines);
+    }
+    vec3Points = [];
+    circleGroup.children.forEach((c) => {
+        vec3Points.push(c.position);
+    })
+
+    let lineGroup = new THREE.BufferGeometry().setFromPoints(vec3Points);
+    lines = new THREE.Line(lineGroup, lineMaterial);
+    lines.name = "lines";
+    scene.add(circleGroup);
+    scene.add(lines);
+}
+
+function initializePath(layerHeight, nbLayers, viewerOffsets, pos=[0, 0, 0], values0){ //code repurposed from ToolpathUnitGenerator
     //add vertical cross
     const crossVerticalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, layerHeight*nbLayers)]);
     const crossVertical = new THREE.Line(crossVerticalGeometry, crossMaterial);
     scene.add(crossVertical);
+
+    // Pad viewer offsets to fit nbLayers
+    if(viewerOffsets?.length < nbLayers){ 
+        viewerOffsets = viewerOffsets.concat(new Array(nbLayers - viewerOffsets?.length).fill(0));
+    } else{
+        viewerOffsets = viewerOffsets.slice(0, nbLayers);
+    }
 
     //set camera proportional to radius
     let circleGeometry = new THREE.CircleGeometry(layerHeight/3, 32 ); 
 
     //Make three-js group for adding draggable circle points
     position = pos;
+
     for(let i = 0; i < nbLayers; i++){
         let point = { //point, toolpath notation
             x: 0,
@@ -69,8 +100,11 @@ function initializePath(layerHeight, nbLayers, values, pos=[0, 0, 0]){ //code re
             z: layerHeight*i,
             t: 0
         }
-        if(values.length == nbLayers){
-            point.x = values[i];
+        if(viewerOffsets){
+            point.x += viewerOffsets[i];
+        }
+        if(values0?.length == nbLayers){
+            point.x += values0[i];
         }
         
         //add draggable circle per point
@@ -79,27 +113,23 @@ function initializePath(layerHeight, nbLayers, values, pos=[0, 0, 0]){ //code re
         circle.rotation.x = -Math.PI/2; // face the camera
         circleGroup.add(circle);
     }
-    //draw lines from vec3
     vec3Points = [];
     circleGroup.children.forEach((c) => {
         vec3Points.push(c.position);
     })
     calculateOffsets();
 
-    const lineGroup = new THREE.BufferGeometry().setFromPoints(vec3Points);
-    const lines = new THREE.Line(lineGroup, lineMaterial);
-    lines.name = "lines";
-    scene.add(circleGroup);
-    scene.add(lines);
+    addLines();
 }
 
 // input values change
 function refreshPath(){
     circleGroup.remove(...circleGroup.children);
     if(global_state.nbLayers.length != 0 && global_state.layerHeight.length != 0){
-        initializePath(global_state.layerHeight, global_state.nbLayers, global_state.values);
-        defaultLayerHeight = global_state.layerHeight;
-        defaultNbLayers = global_state.nbLayers;
+        initializePath(global_state.layerHeight, global_state.nbLayers, global_state.prevOffsets, position, global_state.values0);
+        prevLayerHeight = global_state.layerHeight;
+        prevNbLayers = global_state.nbLayers;
+        prevValues0 = global_state.values0;
     }
 }
 
@@ -107,7 +137,7 @@ function animate() {
 	renderer.render( scene, camera );
     zoomControls.update();
     if(global_state.layerHeight && global_state.nbLayers){
-        if(global_state.layerHeight != defaultLayerHeight || global_state.nbLayers != defaultNbLayers){ //execute only on path update, delete and rebuild toolpath
+        if(global_state.layerHeight != prevLayerHeight || global_state.nbLayers != prevNbLayers || global_state.values0 != prevValues0){ //execute only on path update, delete and rebuild toolpath
             refreshPath();
         }
     }
@@ -137,18 +167,8 @@ controls.addEventListener( 'dragstart', function ( event ) {
 } );
 
 controls.addEventListener('drag', function(event){
-    var lines = scene.getObjectByName("lines");
     event.object.position.z = pointZ;
-    scene.remove(lines);
-    vec3Points = [];
-    circleGroup.children.forEach((c) => {
-        vec3Points.push(c.position);
-    })
-    const lineGroup = new THREE.BufferGeometry().setFromPoints(vec3Points);
-    let newLines = new THREE.Line(lineGroup, lineMaterial);
-    newLines.name = "lines";
-    scene.add(circleGroup);
-    scene.add(newLines);
+    addLines();
 });
 
 controls.addEventListener( 'dragend', function ( event ) {
