@@ -25,7 +25,6 @@ const config = {
     state: { 
         radius: null,
         nbPointsInLayer: null,
-        offsets: [],
         values0: [],
         prevOffsets: []
     },
@@ -38,7 +37,6 @@ const config = {
 
 function setOutputValues(outports, outputValues, state) {
     if (outputValues && outports.values) {
-        state.offsets = outputValues;
         if(state.values0){
             state.prevOffsets = outputValues.map((offset, idx) => (offset - state.values0[idx]));
         } else {

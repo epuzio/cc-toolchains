@@ -9,7 +9,6 @@ var global_state = { // TO FIX: adding optional svg using file I/O
     layerHeight: 0.0,
     values0: [], // passed in
     prevOffsets: [], // passed in, stores previous user offsets
-    
     values: [], // returned
 };
 window.state = global_state;

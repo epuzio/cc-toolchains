@@ -11,6 +11,10 @@ const config = {
             type: "number",
             value: null,
         },
+        values0:{
+            type: "array",
+            value: [],
+        }
     },
     outports: {
         values: { 
@@ -21,7 +25,8 @@ const config = {
     state: { 
         radius: null,
         nbPointsInLayer: null,
-        offsets: []
+        values0: [],
+        userOffsets: [[],[]]
     },
     ui: {
       displayName: "CC-CustomRadius",
@@ -31,9 +36,9 @@ const config = {
 };
 
 function setOutputValues(outports, outputValues, state) {
-    if (outputValues && outports.values) {
-        state.offsets = outputValues;
-        outports.values.value = outputValues;
+    if (outputValues) {
+        state.userOffsets = outputValues.userOffsets;
+        outports.values.value = outputValues.values;
     } else {
         console.error("outports.values is not defined.");
     }
@@ -47,13 +52,13 @@ function layerViewer(inports, outports, state, global) {
         if(inports.radius.value && inports.nbPointsInLayer.value){
             state.nbPointsInLayer = inports.nbPointsInLayer.value;
             state.radius = inports.radius.value;
+            state.values0 = inports.values0.value;
         }
         iframe.contentWindow.state.nbPointsInLayer = state.nbPointsInLayer;
         iframe.contentWindow.state.radius = state.radius;
-
-        // TO FIX: offsets should update from saved state.
-        // There is currently no function to convert from polar to cartesian offsets in layerViewer
-        iframe.contentWindow.state.values = state.offsets;
+        iframe.contentWindow.state.values0 = inports.values0.value;
+        iframe.contentWindow.state.userOffsets = state.userOffsets;
+        
         setOutputValues(outports, iframe.contentWindow.state?.values, state);
     }
 

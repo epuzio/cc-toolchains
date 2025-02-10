@@ -3,16 +3,18 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 import {DragControls} from 'three/addons/controls/DragControls.js';
 
-var global_state = { // TO FIX: adding optional svg using file I/O
+var global_state = {
     svgPath: "",
     radius: 0.0,
     nbPointsInLayer: 0,
-    values: [] //return this
+    values0: [], // passed in
+    userOffsets: [], // passed in, stores the angular/radial offset from point after v0 is applied
+    values: [] // returned
 };
 window.state = global_state;
-let defaultRadius = 0;
-let defaultNbPointsInLayer = 0;
-// let defaultValues = [];
+let prevRadius = 0;
+let prevNbPointsInLayer = 0;
+let prevValues0 = [];
 
 // Build Scene
 const scene = new THREE.Scene();
@@ -44,32 +46,41 @@ const circleMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } );
 const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: 0x85807b } ); 
 var position;
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xc2bfba });
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
 let vec3Points = [];
 let defaultVec3Points = []; //save starting vec3
+let defaultv0Points = []; //save starting point after v0 offset is applied
 
-function calculateOffsets(){ //radial and angular offset
+function getOffsets(offsetPt, defaultPt){
+    const deltaOffset = {x: offsetPt.x - defaultPt.x, y: offsetPt.y - defaultPt.y};
+    const angle = Math.atan2(deltaOffset.y, deltaOffset.x);
+    const distance = Math.sqrt(deltaOffset.x**2 + deltaOffset.y**2);
 
-    let radialOffset = [];
-    let angularOffset = [];
-    let positionVec3 = new THREE.Vector3(0, 0, 1);
-    for(let i = 0; i < defaultVec3Points.length; i++){
-        const cross = new THREE.Vector3().crossVectors(defaultVec3Points[i], vec3Points[i]);
-        const sign = cross.z >= 0 ? 1 : -1; //angle of rotation positive or negative based on cross product
-        let angle = defaultVec3Points[i].angleTo(vec3Points[i]) * sign;
-        angularOffset.push(angle);
-    
-        let newPt = defaultVec3Points[i].clone().applyAxisAngle(positionVec3, angle); 
-        let dist = (vec3Points[i]).distanceTo(positionVec3) - (newPt).distanceTo(positionVec3);
-        radialOffset.push(dist);
-    }
-    window.state.values = [radialOffset, angularOffset];
-    // Post message to update parent outports
-    window.parent.postMessage({ type: 'radiusStateValuesUpdated', values: window.state.values }, window.location.origin);
+    return [distance, angle];
 }
 
-function initializePath(radius, nbPointsInLayer, offsets, pos=[0, 0, 0]){ //code repurposed from ToolpathUnitGenerator
+function calculateOffsets(){ //radial and angular offset
+    let radialOffset = [];
+    let angularOffset = [];
+    let userOffsets = [[],[]];
+
+    for(let i = 0; i < defaultVec3Points.length; i++){
+        //get the difference between the default radial/angular offset and the new radial/angular offset
+        let [defaultRadial, defaultAngular] = getOffsets(defaultVec3Points[i], {x: position[0], y: position[1]});
+        let [newRadial, newAngular] = getOffsets(vec3Points[i], {x: position[0], y: position[1]});
+        radialOffset.push(newRadial - defaultRadial);
+        angularOffset.push(newAngular - defaultAngular);
+
+        //get the radial/angular offset from point offset by values0 to user offset point
+        let [radial, angular] = getOffsets(vec3Points[i], defaultv0Points[i]);
+        userOffsets[0].push(radial);
+        userOffsets[1].push(angular);
+    }
+    window.state.values = [radialOffset, angularOffset];
+    window.state.userOffsets = userOffsets;
+    window.parent.postMessage({ type: 'radiusStateValuesUpdated', values: { values: window.state.values, userOffsets: window.state.userOffsets } }, window.location.origin);
+}
+
+function initializePath(radius, nbPointsInLayer, userOffsets, pos=[0, 0, 0], values0){ //code repurposed from ToolpathUnitGenerator
     //set camera proportional to radius
     let circleGeometry = new THREE.CircleGeometry( radius/10, 32 ); 
     camera.position.set(0, 0, radius*2);
@@ -79,20 +90,31 @@ function initializePath(radius, nbPointsInLayer, offsets, pos=[0, 0, 0]){ //code
     position[2] = 0;
 
     defaultVec3Points = []; //reset defaultVec3Points
+    defaultv0Points = []; //reset defaultv0Points
 
     for(let i = 0; i < nbPointsInLayer; i++){
         let angle = 2 * i * Math.PI / nbPointsInLayer;
         let point = { //point, toolpath notation
-            x: (position[0] + radius * Math.cos(angle)),
-            y: (position[1] + radius * Math.sin(angle)),
+            x: (position[0] + (radius) * Math.cos(angle)),
+            y: (position[1] + (radius) * Math.sin(angle)),
             z: 0,
             t: 0
         }
-        //add standard point to defaultVec3Points, adjust point according to offset
+
+        //add standard point to defaultVec3Points
         defaultVec3Points.push(new THREE.Vector3(point.x, point.y, point.z));
-        if(offsets.length != 0 && offsets[0].length == nbPointsInLayer && offsets[1].length == nbPointsInLayer){
-            point.x = (position[0] + (radius + offsets[0][i]) * Math.cos(angle + offsets[1][i]));
-            point.y = (position[1] + (radius + offsets[0][i]) * Math.sin(angle + offsets[1][i]));
+        
+        if(values0?.length == nbPointsInLayer){
+            point.x += (values0[i] * Math.cos(angle));
+            point.y += (values0[i] * Math.sin(angle));
+        }
+
+        //add point after v0 offset is applied
+        defaultv0Points.push(new THREE.Vector3(point.x, point.y, point.z));
+
+        if(userOffsets && userOffsets[0]?.length == nbPointsInLayer && userOffsets[1]?.length == nbPointsInLayer){ 
+            point.x += (userOffsets[0][i] * Math.cos(userOffsets[1][i]));
+            point.y += (userOffsets[0][i] * Math.sin(userOffsets[1][i]));
         }
 
         //add draggable circle per point
@@ -126,9 +148,10 @@ function refreshPath(){
     }
     scene.remove(scene.getObjectByName("lines"));
     if(global_state.nbPointsInLayer.length != 0 && global_state.radius.length != 0){
-        initializePath(global_state.radius, global_state.nbPointsInLayer, global_state.values);
-        defaultRadius = global_state.radius;
-        defaultNbPointsInLayer = global_state.nbPointsInLayer;
+        initializePath(global_state.radius, global_state.nbPointsInLayer, global_state.userOffsets, position, global_state.values0);
+        prevRadius = global_state.radius;
+        prevNbPointsInLayer = global_state.nbPointsInLayer;
+        prevValues0 = global_state.values0;
     }
 }
 
@@ -136,7 +159,7 @@ function animate() {
 	renderer.render( scene, camera );
     zoomControls.update();
     if(global_state.radius && global_state.nbPointsInLayer){
-        if(global_state.radius != defaultRadius || global_state.nbPointsInLayer != defaultNbPointsInLayer){ //execute only on path update, delete and rebuild toolpath
+        if(global_state.radius != prevRadius || global_state.nbPointsInLayer != prevNbPointsInLayer || global_state.values0 != prevValues0){ //execute only on path update, delete and rebuild toolpath
             refreshPath();
         }
     }
