@@ -28,6 +28,7 @@
     "lodash": "^4.17.21",
     "three": "^0.166.1",
     "three-orbitcontrols": "^2.110.3",
+    "three-transform-controls": "^1.0.4",
     "uuid": "^9.0.0"
   }
 }

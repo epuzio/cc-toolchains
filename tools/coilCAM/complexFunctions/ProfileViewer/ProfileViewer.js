@@ -16,6 +16,10 @@ let prevNbLayers = 0;
 let prevLayerHeight = 0;
 let prevValues0 = [];
 
+// Button to toggle point dragging
+let showDragPoints = true;
+document.querySelector(".slider").addEventListener("click", () => toggleDragPoints());
+
 // Build Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( {color : 0xe3e1de}); //colors from styles.css for pathDrawing
@@ -107,7 +111,7 @@ function initializePath(layerHeight, nbLayers, viewerOffsets, pos=[0, 0, 0], val
         }
         
         //add draggable circle per point
-        const circle = new THREE.Mesh(circleGeometry, circleMaterial ); 
+        const circle = new THREE.Mesh(circleGeometry, circleMaterial); 
         circle.position.set(point.x, point.y + yOffset, point.z);
         circle.rotation.x = -Math.PI/2; // face the camera
         circleGroup.add(circle);
@@ -162,17 +166,29 @@ controls.addEventListener('hoveroff', function ( event ) {
 
 
 controls.addEventListener( 'dragstart', function ( event ) {
-    pointZ = event.object.position.z;
+    if(showDragPoints){
+        pointZ = event.object.position.z;
+    }
 } );
 
 controls.addEventListener('drag', function(event){
-    event.object.position.z = pointZ;
-    addLines();
+    if(showDragPoints){
+        event.object.position.z = pointZ;
+        addLines();
+    }
 });
 
 controls.addEventListener( 'dragend', function ( event ) {
-    event.object.position.z = pointZ;
-	event.object.material = circleMaterial;
-    calculateOffsets();
-    window.parent.postMessage({message:"run-codemirror"}, '*'); // update TPV when dragend finished
+    if(showDragPoints){
+        event.object.position.z = pointZ;
+        event.object.material = circleMaterial;
+        calculateOffsets();
+        window.parent.postMessage({message:"run-codemirror"}, '*'); // update TPV when dragend finished
+    }
 });
+
+function toggleDragPoints(){
+    showDragPoints = !showDragPoints;
+    circleGroup.visible = showDragPoints;
+    controls.enabled = showDragPoints;
+}

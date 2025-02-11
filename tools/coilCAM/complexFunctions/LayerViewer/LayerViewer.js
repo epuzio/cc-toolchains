@@ -16,6 +16,11 @@ let prevRadius = 0;
 let prevNbPointsInLayer = 0;
 let prevValues0 = [];
 
+// Button to toggle point dragging
+let showDragPoints = true;
+document.querySelector(".slider").addEventListener("click", () => toggleDragPoints());
+
+
 // Build Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( {color : 0xe3e1de}); //colors from styles.css for pathDrawing
@@ -46,6 +51,10 @@ const circleMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } );
 const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: 0x85807b } ); 
 var position;
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xc2bfba });
+const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+directionalLight.position.y = 3
+scene.add(directionalLight);
+
 let vec3Points = [];
 let defaultVec3Points = []; //save starting vec3
 let defaultv0Points = []; //save starting point after v0 offset is applied
@@ -82,7 +91,7 @@ function calculateOffsets(){ //radial and angular offset
 
 function initializePath(radius, nbPointsInLayer, userOffsets, pos=[0, 0, 0], values0){ //code repurposed from ToolpathUnitGenerator
     //set camera proportional to radius
-    let circleGeometry = new THREE.CircleGeometry( radius/10, 32 ); 
+    let circleGeometry = new THREE.CircleGeometry(radius/20, 32 ); 
     camera.position.set(0, 0, radius*2);
 
     //Make three-js group for adding draggable circle points
@@ -118,7 +127,7 @@ function initializePath(radius, nbPointsInLayer, userOffsets, pos=[0, 0, 0], val
         }
 
         //add draggable circle per point
-        const circle = new THREE.Mesh(circleGeometry, circleMaterial ); 
+        const circle = new THREE.Mesh(circleGeometry, circleMaterial); 
         circle.position.set(point.x, point.y, point.z + zOffset);
         circleGroup.add(circle);
     }
@@ -173,31 +182,50 @@ window.addEventListener("resize", function(){
 
 //dragging points
 const controls = new DragControls(circleGroup.children, camera, renderer.domElement);
-controls.addEventListener( 'dragstart', function ( event ) {
+
+controls.addEventListener('hoveron', function ( event ) {
 	event.object.material = circleHighlightMaterial;
+})
+
+controls.addEventListener('hoveroff', function ( event ) {
+	event.object.material = circleMaterial;
+})
+
+controls.addEventListener( 'dragstart', function ( event ) {
+    if(showDragPoints){
+	    event.object.material = circleHighlightMaterial;
+    }
 } );
 
 controls.addEventListener('drag', function(event){
-    var lines = scene.getObjectByName("lines");
-    scene.remove(lines);
-    vec3Points = [];
-    circleGroup.traverse(function(c){
-        if(!(c.position.x == position[0] && c.position.y == position[1] && c.position.z == 0)){
-            vec3Points.push(c.position);
-        } 
-    })
-    vec3Points.push(vec3Points[0]);
-    const lineGroup = new THREE.BufferGeometry().setFromPoints(vec3Points);
-    let newLines = new THREE.Line(lineGroup, lineMaterial);
-    newLines.name = "lines";
-    scene.add(circleGroup);
-    scene.add(newLines);
+    if(showDragPoints){
+        var lines = scene.getObjectByName("lines");
+        scene.remove(lines);
+        vec3Points = [];
+        circleGroup.traverse(function(c){
+            if(!(c.position.x == position[0] && c.position.y == position[1] && c.position.z == 0)){
+                vec3Points.push(c.position);
+            } 
+        })
+        vec3Points.push(vec3Points[0]);
+        const lineGroup = new THREE.BufferGeometry().setFromPoints(vec3Points);
+        let newLines = new THREE.Line(lineGroup, lineMaterial);
+        newLines.name = "lines";
+        scene.add(circleGroup);
+        scene.add(newLines);
+    }
 });
 
 controls.addEventListener( 'dragend', function ( event ) {
-	event.object.material = circleMaterial;
-    calculateOffsets();
-    window.parent.postMessage({message:"run-codemirror"}, '*'); // update TPV when dragend finished
+    if(showDragPoints){
+        event.object.material = circleMaterial;
+        calculateOffsets();
+        window.parent.postMessage({message:"run-codemirror"}, '*'); // update TPV when dragend finished
+    }
 });
 
-
+function toggleDragPoints(){
+    showDragPoints = !showDragPoints;
+    circleGroup.visible = showDragPoints;
+    controls.enabled = showDragPoints;
+}
