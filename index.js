@@ -129,12 +129,14 @@ function setupProxies(toolFunc, tool) {
   return true;
 }
 
-function initializeConfig(path, toolConfig) {
+function initializeConfig(path, toolConfig, isVars = false) {
   const toolType = path.split("/").at(-1).split(".")[0];
+  const xPos = isVars ? globalState.mouse.x - 200 : globalState.mouse.x + 110;
+  const yPos = isVars ? globalState.mouse.y - 25 : globalState.mouse.y;
   const conf = {
     path: path,
     toolID: `${toolType}_${uuidv4()}`,
-    pos: { x: globalState.mouse.x, y: globalState.mouse.y },
+    pos: { x: xPos, y:yPos },
     inports: toolConfig.inports ?? {},
     outports: toolConfig.outports ?? {},
     state: toolConfig.state ?? {},
@@ -162,13 +164,13 @@ async function importTool(path) {
   globalState.imports[path] = toolExport;
 }
 
-async function addTool(path, config) {
+async function addSingleTool(path, config, isVars = false) {
   if (!(path in globalState.imports)) {
     await importTool(path);
   }
 
   const toolObj = globalState.imports[path];
-  const newTool = config ?? initializeConfig(path, toolObj.config);
+  const newTool = config ?? initializeConfig(path, toolObj.config, isVars);
   newTool.domInitialized = false;
 
   setupProxies(toolObj.tool, newTool);
@@ -178,7 +180,15 @@ async function addTool(path, config) {
   if ("init" in newTool.lifecycle) newTool.lifecycle.init();
 }
 
-function newToolcahin() {
+async function addTool(path, config) { // adjusted addTool to accept array of paths
+  const paths = path.split(",");
+  await addSingleTool(paths[0], config, false);
+  if(paths.length > 1) {
+    await addSingleTool(paths[1], config, true);
+  }
+}
+
+function newToolchain() {
   globalState.toolchain = {
     tools: {},
     pipes: {},
@@ -190,7 +200,7 @@ function uploadToolchain(toolchainJSON, snippet = false) {
   if (!snippet) {
     // If we're not adding a snippet, clear the current toolchain
     // TODO: (should probably warn / prompt if there is a toolchain)
-    newToolcahin();
+    newToolchain();
     // Also if not a snippet, set panzoom to the uploaded panzoom
     globalState.panZoom.setPanZoom(toolchainJSON.workspace);
   }

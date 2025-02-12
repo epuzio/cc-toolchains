@@ -165,6 +165,7 @@ function toolpathVariables(inports, outports, state) {
             padding: .2em;
         }
       </style>
+      
         <div id="variable-block-padding">
             <div id= "variable-block">
                 Position:

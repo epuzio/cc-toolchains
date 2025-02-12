@@ -5,27 +5,27 @@ const {sinusoidal2D: ccSinusoidal2D} = functions2D; //avoid naming conflict
 
 const config = {
   inports: {
-    amplitudeX: {
+    amplitude_X: {
         type: "number",
         value: null,
     },
-    periodX: {
+    period_X: {
         type: "number",
         value: null,
     },
-    offsetX: {
+    offset_X: {
         type: "any", //check
         value: null,
     },
-    amplitudeY: {
+    amplitude_Y: {
         type: "number",
         value: null,
     },
-    periodY: {
+    period_Y: {
         type: "number",
         value: null,
     },
-    offsetY: {
+    offset_Y: {
         type: "any", //check
         value: null,
     },
@@ -33,11 +33,11 @@ const config = {
         type: "number",
         value: null,
     },
-    valuesX: {
+    values_X: {
         type: "any",
         value: null,
     },
-    valuesY: {
+    values_Y: {
         type: "any",
         value: null,
     },
@@ -61,9 +61,9 @@ const config = {
 
 function sinusoidal2D(inports, outports) { //for now, resemble constants
     function inportsUpdated() {
-        if (inports.amplitudeX.value !== null && inports.amplitudeY.value !== null && inports.periodY.value !== null && inports.periodX.value !== null && inports.nbPoints.value !== null) {
-            outports.values.value = ccSinusoidal2D(inports.amplitudeX.value, inports.periodX.value, inports.amplitudeY.value, inports.periodY.value, inports.offsetX.value, inports.offsetY.value,
-                inports.nbPoints.value, inports.valuesX.value, inports.valuesY.value, inports.mode.value);
+        if (inports.amplitude_X.value !== null && inports.amplitude_Y.value !== null && inports.period_Y.value !== null && inports.period_X.value !== null && inports.nbPoints.value !== null) {
+            outports.values.value = ccSinusoidal2D(inports.amplitude_X.value, inports.period_X.value, inports.amplitude_Y.value, inports.period_Y.value, inports.offset_X.value, inports.offset_Y.value,
+                inports.nbPoints.value, inports.values_X.value, inports.values_Y.value, inports.mode.value);
         }
     }
     return {inportsUpdated};

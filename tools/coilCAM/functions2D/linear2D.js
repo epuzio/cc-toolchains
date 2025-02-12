@@ -5,19 +5,19 @@ const {linear2D: ccLinear2D} = functions2D; //avoid naming conflict
 
 const config = {
   inports: {
-    amplitudeX1: {
+    amplitude_X: {
         type: "number",
         value: null,
     },
-    offsetX1: {
+    offset_X: {
         type: "any", //check
         value: null,
     },
-    amplitudeX2: {
+    amplitude_Y: {
         type: "number",
         value: null,
     },
-    offsetX2: {
+    offset_Y: {
         type: "any", //check
         value: null,
     },
@@ -25,11 +25,11 @@ const config = {
         type: "number",
         value: null,
     },
-    values0x: {
+    values0_X: {
         type: "any",
         value: null,
     },
-    values0y: {
+    values0_Y: {
         type: "any",
         value: null,
     },
@@ -39,7 +39,7 @@ const config = {
     },
   },
   outports: {
-    values: { //?
+    values: {
       type: "any",
       value: null,
     },
@@ -53,9 +53,9 @@ const config = {
 
 function linear2D(inports, outports) { //for now, resemble constants
     function inportsUpdated() {
-        if (inports.amplitudeX1.value !== null && inports.amplitudeX2.value !== null && inports.nbPoints.value !== null) {
-            outports.values.value = ccLinear2D(inports.amplitudeX1.value, inports.offsetX1.value, inports.amplitudeX2.value, inports.offsetX2.value,
-                inports.nbPoints.value, inports.values0x.value, inports.values0y.value, inports.mode.value);
+        if (inports.amplitude_X.value !== null && inports.amplitude_Y.value !== null && inports.nbPoints.value !== null) {
+            outports.values.value = ccLinear2D(inports.amplitude_X.value, inports.offset_X.value, inports.amplitude_Y.value, inports.offset_Y.value,
+                inports.nbPoints.value, inports.values0_X.value, inports.values0_Y.value, inports.mode.value);
         }
     }
     return {inportsUpdated};

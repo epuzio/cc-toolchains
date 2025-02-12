@@ -5,35 +5,23 @@
     "entries": [
       {
         "displayName": "Sinusoidal",
-        "path": "coilCAM/functions1D/sinusoidal"
-      },
-      {
-        "displayName": "Sinusoidal Variables",
-        "path": "coilCAM/functions1D/sinusoidalVariables"
+        "path": ["coilCAM/functions1D/sinusoidal", "coilCAM/functions1D/defaultVariables/sinusoidalVariables"]
       },
       {
         "displayName": "Linear",
-        "path": "coilCAM/functions1D/linear"
+        "path": ["coilCAM/functions1D/linear", "coilCAM/functions1D/defaultVariables/linearVariables"]
       },
       {
         "displayName": "Exponential",
-        "path": "coilCAM/functions1D/exponential"
+        "path": ["coilCAM/functions1D/exponential", "coilCAM/functions1D/defaultVariables/exponentialVariables"]
       },
       {
         "displayName": "Staircase",
-        "path": "coilCAM/functions1D/staircase"
-      },
-      {
-        "displayName": "Staircase Variables",
-        "path": "coilCAM/functions1D/staircaseVariables"
+        "path": ["coilCAM/functions1D/staircase", "coilCAM/functions1D/defaultVariables/staircaseVariables"]
       },
       {
         "displayName": "Square",
-        "path": "coilCAM/functions1D/square"
-      },
-      {
-        "displayName": "Square Variables",
-        "path": "coilCAM/functions1D/squareVariables"
+        "path": ["coilCAM/functions1D/square", "coilCAM/functions1D/defaultVariables/squareVariables"]
       }
     ]
   },
@@ -43,11 +31,11 @@
     "entries": [
       {
         "displayName": "Linear2D",
-        "path": "coilCAM/functions2D/linear2D"
+        "path": ["coilCAM/functions2D/linear2D", "coilCAM/functions2D/defaultVariables/linear2DVariables"]
       },
       {
         "displayName": "Sinusoidal2D",
-        "path": "coilCAM/functions2D/sinusoidal2D"
+        "path": ["coilCAM/functions2D/sinusoidal2D", "coilCAM/functions2D/defaultVariables/sinusoidal2DVariables"]
       }
     ]
   },
@@ -79,11 +67,7 @@
     "entries": [
       {
         "displayName": "ToolpathUnitGenerator",
-        "path": "coilCAM/setup/ToolpathUnitGenerator"
-      },
-      {
-        "displayName": "Toolpath Variables",
-        "path": "coilCAM/setup/ToolpathVariables"
+        "path": ["coilCAM/setup/ToolpathUnitGenerator", "coilCAM/setup/defaultVariables/ToolpathVariables"]
       },
       {
         "displayName": "Toolpath Viewer",

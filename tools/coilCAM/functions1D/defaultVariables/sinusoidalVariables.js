@@ -1,7 +1,8 @@
 //default variable inports for sinusoidal function
+//note: will appear as "default" option when sinusoidal tool is added
 
 import { html } from "lit-html";
-import { parameter } from "../toolchainParameter.js";
+import { parameter } from "../../toolchainParameter.js";
 
 const config = {
   inports: {},
@@ -17,12 +18,17 @@ const config = {
     offset: {
       type: "number",
       value: 0,
-    }
+    },
+    mode: {
+      type: "string",
+      value: "additive",
+    },
   },
   state: {
-    amplitude: 0.0,
-    period: 0.0,
+    amplitude: 5.0,
+    period: 10.0,
     offset: 0.0,
+    mode: "additive",
   },
   ui: {
     displayName: "Sinusoidal Variables",
@@ -37,14 +43,19 @@ function sinusoidalVariables(inports, outports, state) {
       ${parameter("Amplitude", state.amplitude, (value) => { 
           state.amplitude = value; 
           outports.amplitude.value = value; 
-      })}
+      }, false)}
       ${parameter("Period", state.period, (value) => { 
           state.period = value; 
           outports.period.value = value; 
-      })}
+      }, true)}
       ${parameter("Offset", state.offset, (value) => { 
           state.offset = value;
-          outports.offset.value = value; })}
+          outports.offset.value = value; 
+      }, false)}
+      ${parameter("Mode", state.mode, (value) => { 
+        state.mode = value;
+        outports.mode.value = value ? "additive" : "multiplicative"; 
+      }, true)}
     `;
   }
   return { render };
