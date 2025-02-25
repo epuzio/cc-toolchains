@@ -25,7 +25,8 @@ const config = {
         },
       },
     ui: {
-      displayName: "CC-ToolpathViewer",
+      displayName: "Toolpath Viewer",
+      icon: "eye",
       width: 500,
       height: 500,
     },
@@ -49,12 +50,16 @@ function toolpathViewer(inports, outports, state, global) {
     function inportsUpdated(){
         if(inports.bedDimensions.value !== null){
             iframe.contentWindow.state.bedDimensions = inports.bedDimensions.value;
-        }
+        } 
         if(inports.path.value !== null){
             iframe.contentWindow.state.path = inports.path.value;
+        } else{
+            iframe.contentWindow.state.path = [];
         }
         if(inports.referencePath.value !== null){
             iframe.contentWindow.state.referencePath = inports.referencePath.value;
+        } else{
+            iframe.contentWindow.state.referencePath = [];
         }
         setOutputPath(outports, iframe.contentWindow.state?.outputPath);
     }

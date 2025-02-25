@@ -55,7 +55,8 @@ const config = {
     },
   },
   ui: {
-    displayName: "CC-ToolpathUnitGenerator",
+    displayName: "Toolpath Unit Generator",
+    icon: "wave-square",
     width: 130,
     height: 100,
   },

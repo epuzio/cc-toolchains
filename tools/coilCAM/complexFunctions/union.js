@@ -1,5 +1,7 @@
 import {complexFunctions} from "coilcam/dist/main";
 const {union: ccUnion} = complexFunctions; //avoid naming conflict
+// import {unionTest} from "./complexTest";
+
 const config = {
   inports: {
     path0: {
@@ -18,7 +20,8 @@ const config = {
     },
   },
   ui: {
-    displayName: "CC-union",
+    displayName: "Union",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },
@@ -27,7 +30,7 @@ const config = {
 function union(inports, outports) { //for now, resemble constants
     function inportsUpdated() {
         if (inports.path0.value !== null && inports.path1.value !== null) {
-            outports.values.value = ccUnion(inports.path0.value, inports.path1.value);
+            outports.path.value = ccUnion(inports.path0.value, inports.path1.value);
         }
     }
     return {inportsUpdated};

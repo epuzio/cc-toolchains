@@ -16,44 +16,52 @@ let prevRadius = 0;
 let prevNbPointsInLayer = 0;
 let prevValues0 = [];
 
+const colors = {
+    lightline: 0xbdbdbd,
+    darkline: 0x000000,
+    circle: 0x2E3440,
+    circleHighlight: 0x414f69
+}
+
 // Button to toggle point dragging
 let showDragPoints = true;
 document.querySelector(".slider").addEventListener("click", () => toggleDragPoints());
-
+document.querySelector(".button").addEventListener("click", () => resetPath());
 
 // Build Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( {color : 0xe3e1de}); //colors from styles.css for pathDrawing
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.up.set(0, 0, 1); // to ensure z is up and down instead of default (y)
-camera.position.set(0, 0, 40); //adjust z with radius?
-camera.rotation.y = Math.PI;
+camera.up.set(0, -1, 0); // rotate camera 180 degrees around z-axis
+camera.position.set(0, 0, 20); //adjust z with radius?
+camera.rotation.z = Math.PI/3; // 180 degrees in radians
+
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 const zoomControls = new OrbitControls(camera, renderer.domElement);
 zoomControls.enableRotate = false;
-const zOffset = -.001
-
-//Add crosshair at position[x, y]
-const crossMaterial = new THREE.LineBasicMaterial({color: 0xc2bfba});
-const crossHorizontalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(5, 0, 0), new THREE.Vector3( -5, 0, 0)]);
-const crossVerticalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -5, 0), new THREE.Vector3( 0, 5, 0)]);
-const crossHorizontal = new THREE.Line(crossHorizontalGeometry, crossMaterial);
-const crossVertical = new THREE.Line(crossVerticalGeometry, crossMaterial);
-scene.add(crossHorizontal);
-scene.add(crossVertical);
+const zOffset = -.01
 
 var circleGroup = new THREE.Group();
 circleGroup.name = "circleGroup";
-const circleMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } ); 
-const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: 0x85807b } ); 
+const circleMaterial = new THREE.MeshToonMaterial( { color: colors.circle } ); 
+const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: colors.circleHighlight } ); 
+
 var position;
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xc2bfba });
+const lineMaterial = new THREE.LineBasicMaterial({ color: colors.darkline });
+const bkgLineMaterial = new THREE.LineBasicMaterial({ color: colors.lightline });
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
 directionalLight.position.y = 3
 scene.add(directionalLight);
+
+//Add crosshair at position[x, y]
+const crossHorizontalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(5, 0, 0), new THREE.Vector3( -5, 0, 0)]);
+const crossVerticalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -5, 0), new THREE.Vector3( 0, 5, 0)]);
+scene.add(new THREE.Line(crossHorizontalGeometry, bkgLineMaterial));
+scene.add(new THREE.Line(crossVerticalGeometry, bkgLineMaterial));
 
 let vec3Points = [];
 let defaultVec3Points = []; //save starting vec3
@@ -63,8 +71,12 @@ function getOffsets(offsetPt, defaultPt){
     const deltaOffset = {x: offsetPt.x - defaultPt.x, y: offsetPt.y - defaultPt.y};
     const angle = Math.atan2(deltaOffset.y, deltaOffset.x);
     const distance = Math.sqrt(deltaOffset.x**2 + deltaOffset.y**2);
-
     return [distance, angle];
+}
+
+function resetPath(){
+    global_state.userOffsets = new Array(global_state.nbPointsInLayer).fill(0);
+    refreshPath();
 }
 
 function calculateOffsets(){ //radial and angular offset
@@ -153,9 +165,14 @@ function initializePath(radius, nbPointsInLayer, userOffsets, pos=[0, 0, 0], val
 function refreshPath(){
     while (circleGroup.children.length)
     {
+        circleGroup.children[0].geometry.dispose();
+        circleGroup.children[0].material.dispose();
         circleGroup.remove(circleGroup.children[0]);
     }
-    scene.remove(scene.getObjectByName("lines"));
+    let prevLines = scene.getObjectByName("lines");
+    prevLines?.geometry.dispose();
+    prevLines?.material.dispose();
+    scene.remove(prevLines);
     if(global_state.nbPointsInLayer.length != 0 && global_state.radius.length != 0){
         initializePath(global_state.radius, global_state.nbPointsInLayer, global_state.userOffsets, position, global_state.values0);
         prevRadius = global_state.radius;
@@ -199,8 +216,13 @@ controls.addEventListener( 'dragstart', function ( event ) {
 
 controls.addEventListener('drag', function(event){
     if(showDragPoints){
-        var lines = scene.getObjectByName("lines");
-        scene.remove(lines);
+        // var lines = scene.getObjectByName("lines");
+        // scene.remove(lines);
+        let prevLines = scene.getObjectByName("lines");
+        console.log("prevLines", prevLines, "scene", scene);
+        prevLines?.geometry.dispose();
+        prevLines?.material.dispose();
+        scene.remove(prevLines);
         vec3Points = [];
         circleGroup.traverse(function(c){
             if(!(c.position.x == position[0] && c.position.y == position[1] && c.position.z == 0)){

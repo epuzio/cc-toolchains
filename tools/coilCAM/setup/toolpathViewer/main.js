@@ -33,6 +33,8 @@ export default class ToolpathViewer {
 
     showDragPoints = true; // Users can drag points
 
+    
+
     constructor(TPVcontainer) {
         this.TPVcontainer = TPVcontainer;
         this.scene = new THREE.Scene();
@@ -62,8 +64,9 @@ export default class ToolpathViewer {
     }
 
     toggleDragPoints(){
-        this.showDragPoints = !this.showDragPoints;
-        this.dragPoints.visible = this.showDragPoints;
+            this.showDragPoints = !this.showDragPoints;
+            this.dragPoints.visible = this.showDragPoints;
+        
     }
     
     pointerUp(){
@@ -182,7 +185,7 @@ export default class ToolpathViewer {
         var offset = new THREE.Vector3(); //midpoint of cylinder
         offset.addVectors(pointEnd, pointStart).divideScalar(2);
         
-        const segmentGeometry = new THREE.CylinderGeometry(pointEndThickness+1, pointStartThickness+1, dir.length(), 8);
+        const segmentGeometry = new THREE.CylinderGeometry(pointEndThickness+.5, pointStartThickness+.5, dir.length(), 8);
         const segment = new THREE.Mesh(segmentGeometry, material); 
         segment.quaternion.copy(quat);
         segment.position.set(offset.x, offset.y, offset.z);
@@ -203,6 +206,7 @@ export default class ToolpathViewer {
         }
         if(pathType == "referencePath"){
             toolpath.name = "referencePath";
+            this.showDragPoints = false;
             material = this.cylinderReferenceMaterial;
         }
 

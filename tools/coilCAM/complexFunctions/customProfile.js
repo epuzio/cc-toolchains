@@ -29,9 +29,10 @@ const config = {
         prevOffsets: []
     },
     ui: {
-      displayName: "CC-CustomProfile",
-      width: 500,
-      height: 500,
+      displayName: "Custom 1D (Profile)",
+      icon: "eye",
+      width: 350,
+      height: 350,
     },
 };
 

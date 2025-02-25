@@ -60,6 +60,64 @@ export const parameter = (variableName, defaultValue, updatePorts, offColor = fa
         `;
     }
 
+    if(variableName === "Position"){
+        defaultValue = {x: defaultValue[0], y: defaultValue[1], z: defaultValue[2]};
+        return html`
+        <div style="--bkg: ${labelBackground}; --inputbkg: ${inputBackground};">
+        ${styles()}
+            <div id= "variable-block">
+                ${variableName}:
+                <div style="width: 98px;">
+                    <div id="position-variable-text" width="20px">
+                        X:
+                        <div>
+                            <span>
+                                <input
+                                style="background-color: var(--bkg)"
+                                type="number"
+                                .value=${defaultValue.x}
+                                .step=${increments.step}
+                                .min=${increments.min}
+                                .max=${increments.max}
+                                @change=${(e) => (updatePorts([Number(e.target.value), defaultValue.y, defaultValue.z]))} />
+                            </span>
+                        </div>
+                    </div>
+                   <div id="position-variable-text" width="20px">
+                        Y:
+                        <div>
+                            <span>
+                                <input
+                                style="background-color: var(--bkg)"
+                                type="number"
+                                .value=${defaultValue.y}
+                                .step=${increments.step}
+                                .min=${increments.min}
+                                .max=${increments.max}
+                                @change=${(e) => (updatePorts([defaultValue.x, Number(e.target.value), defaultValue.z]))} />
+                            </span>
+                        </div>
+                    </div>
+                    <div id="position-variable-text" width="20px">
+                        Z:
+                        <div>
+                            <span>
+                                <input
+                                style="background-color: var(--bkg)"
+                                type="number"
+                                .value=${defaultValue.z}
+                                .step=${increments.step}
+                                .min=${increments.min}
+                                .max=${increments.max}
+                                @change=${(e) => (updatePorts([defaultValue.x, defaultValue.y, Number(e.target.value)]))} />
+                            </span>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        `;
+    }
+
     return html`
     <div style="--bkg: ${labelBackground}; --inputbkg: ${inputBackground};">
     ${styles()}
@@ -111,7 +169,6 @@ const toggleCSS = () =>{
         </style>
     `;
 } 
-
 
 const styles = () => {
     return html`
@@ -208,7 +265,7 @@ const styles = () => {
             color: var(--text-light);
             display: flex;
             align-items: left;
-            justify-content: space-between;
+            justify-content: right;
             // padding: 0.2rem 0.5rem;
             }
             #position-variable-text {
@@ -216,8 +273,11 @@ const styles = () => {
                 color: var(--black);
                 font-weight: 900;
                 border-radius: 0.3rem;
-                font-size: 1rem;
-                padding: 03px;
+                font-size: 15px;
+                padding: 2px;
+                display: flex;
+                align-items: right;
+                gap: 5px;
             }
             #variable-block-padding {
                 background-color: #1b181c;

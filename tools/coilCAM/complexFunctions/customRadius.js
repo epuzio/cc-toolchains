@@ -29,9 +29,10 @@ const config = {
         userOffsets: [[],[]]
     },
     ui: {
-      displayName: "CC-CustomRadius",
-      width: 500,
-      height: 500,
+      displayName: "Custom 2D (Radius)",
+      icon: "eye",
+      width: 350,
+      height: 350,
     },
 };
 

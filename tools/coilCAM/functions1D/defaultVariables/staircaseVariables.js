@@ -16,7 +16,7 @@ const config = {
     },
     offset: {
       type: "number",
-      value: 0,
+      value: 0.0,
     },
     mode: {
       type: "string",
@@ -39,18 +39,22 @@ const config = {
 function linearVariables(inports, outports, state) {
   function render() {
     return html`
-      ${parameter("Amplitude", state.amplitude, (value) => { 
-          state.amplitude = value; 
-          outports.amplitude.value = value; 
+      ${parameter("Step Width", state.stepWidth, (value) => { 
+          state.stepWidth = value; 
+          outports.stepWidth.value = value; 
       }, false)}
+      ${parameter("Step Height", state.stepHeight, (value) => { 
+        state.stepHeight = value; 
+        outports.stepHeight.value = value; 
+      }, true)}
       ${parameter("Offset", state.offset, (value) => { 
           state.offset = value;
           outports.offset.value = value; 
-      }, true)}
+      }, false)}
       ${parameter("Mode", state.mode, (value) => { 
         state.mode = value;
         outports.mode.value = value ? "additive" : "multiplicative"; 
-      }, false)}
+      }, true)}
     `;
   }
   return { render };

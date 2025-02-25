@@ -23,6 +23,7 @@ const config = {
   },
   ui: {
     displayName: "Spiralize",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },
@@ -31,11 +32,9 @@ const config = {
   },
 };
 
-function spiralize(inports, outports, state) { //for now, resemble constants
+function spiralize(inports, outports, state) {
     function inportsUpdated() {
-        // console.log("path in: ", inports.pathIn.value, " layerheight: ", inports.layerHeight.value);
         if (inports.pathIn.value !== null && inports.layerHeight !== null) { 
-            // console.log("output should be: ", ccSpiralize(inports.pathIn.value, inports.layerHeight.value));
             outports.pathOut.value = ccSpiralize(inports.pathIn.value, inports.layerHeight.value);
             state.pathOut = outports.pathOut.value;
         }

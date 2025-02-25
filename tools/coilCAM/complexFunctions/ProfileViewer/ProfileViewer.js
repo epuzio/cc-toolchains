@@ -16,9 +16,17 @@ let prevNbLayers = 0;
 let prevLayerHeight = 0;
 let prevValues0 = [];
 
+const colors = {
+    lightline: 0xbdbdbd,
+    darkline: 0x000000,
+    circle: 0x2E3440,
+    circleHighlight: 0x414f69
+}
+
 // Button to toggle point dragging
 let showDragPoints = true;
 document.querySelector(".slider").addEventListener("click", () => toggleDragPoints());
+document.querySelector(".button").addEventListener("click", () => resetPath());
 
 // Build Scene
 const scene = new THREE.Scene();
@@ -37,25 +45,30 @@ const yOffset = 0;
 var circleGroup = new THREE.Group();
 circleGroup.name = "circleGroup";
 var lines;
-const circleMaterial = new THREE.MeshToonMaterial( { color: 0xb7afa6 } ); 
-const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: 0x85807b } ); 
+const circleMaterial = new THREE.MeshToonMaterial( { color: colors.circle } ); 
+const circleHighlightMaterial = new THREE.MeshToonMaterial( { color: colors.circleHighlight } ); 
 var position;
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xc2bfba });
+const lineMaterial = new THREE.LineBasicMaterial({ color: colors.darkline });
+const bkgLineMaterial = new THREE.LineBasicMaterial({ color: colors.lightline });
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
 directionalLight.position.z = 3
 scene.add(directionalLight);
 let vec3Points = [];
 
 //Add crosshair at position[x, y]
-const crossMaterial = new THREE.LineBasicMaterial({color: 0xc2bfba});
 const crossHorizontalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-5, 0, 0), new THREE.Vector3(0, 0, 0)]);
-const crossHorizontal = new THREE.Line(crossHorizontalGeometry, crossMaterial);
-scene.add(crossHorizontal);
+scene.add(new THREE.Line(crossHorizontalGeometry, bkgLineMaterial));
 
 function calculateOffsets(){ // offset along the xy plane
     window.state.values = vec3Points.map(point => (point.x - position[2]));
     // Post message to update parent outports
     window.parent.postMessage({ type: 'profileStateValuesUpdated', values: window.state.values}, window.location.origin);
+}
+
+function resetPath(){
+    circleGroup.remove(...circleGroup.children);
+    global_state.prevOffsets = new Array(global_state.nbLayers).fill(0);
+    initializePath(global_state.layerHeight, global_state.nbLayers, global_state.prevOffsets, position, global_state.values0);
 }
 
 function addLines(){
@@ -77,11 +90,20 @@ function addLines(){
     scene.add(lines);
 }
 
-function initializePath(layerHeight, nbLayers, viewerOffsets, pos=[0, 0, 0], values0){ //code repurposed from ToolpathUnitGenerator
-    //add vertical cross
+function initializePath(layerHeight, nbLayers, viewerOffsets, pos=[0, 0, 0], values0){
+    // Add vertical crosshair
+    const crossVerticalObj = scene.getObjectByName("crossVertical");
+    if (crossVerticalObj) {
+        scene.remove(crossVerticalObj);
+        crossVerticalObj.geometry.dispose();
+        crossVerticalObj.material.dispose();
+    }
+    console.log("scene 1:", scene);
     const crossVerticalGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, layerHeight*nbLayers)]);
-    const crossVertical = new THREE.Line(crossVerticalGeometry, crossMaterial);
+    const crossVertical = new THREE.Line(crossVerticalGeometry, bkgLineMaterial);
+    crossVertical.name = "crossVertical";
     scene.add(crossVertical);
+    console.log("scene", scene);
 
     // Pad viewer offsets to fit nbLayers
     if(viewerOffsets?.length < nbLayers){ 
@@ -127,7 +149,16 @@ function initializePath(layerHeight, nbLayers, viewerOffsets, pos=[0, 0, 0], val
 
 // input values change
 function refreshPath(){
-    circleGroup.remove(...circleGroup.children);
+    while (circleGroup.children.length)
+    {
+        circleGroup.children[0].geometry.dispose();
+        circleGroup.children[0].material.dispose();
+        circleGroup.remove(circleGroup.children[0]);
+    }
+    let prevLines = scene.getObjectByName("lines");
+    prevLines?.geometry.dispose();
+    prevLines?.material.dispose();
+    scene.remove(prevLines);
     if(global_state.nbLayers.length != 0 && global_state.layerHeight.length != 0){
         initializePath(global_state.layerHeight, global_state.nbLayers, global_state.prevOffsets, position, global_state.values0);
         prevLayerHeight = global_state.layerHeight;

@@ -19,7 +19,7 @@ const config = {
         },
         printSpeed: {
             type: "number",
-            value: null,
+            value: 60, //default
         },
     },
     outports: {
@@ -29,7 +29,8 @@ const config = {
         },
     },
     ui: {
-        displayName: "CC-GCodeGenerator",
+        displayName: "GCode Generator",
+        icon: "print",
         width: 130,
         height: 100,
     },
@@ -37,8 +38,8 @@ const config = {
 
 function GCodeGenerator(inports, outports) {
     function inportsUpdated() {
-        if(inports.path.value !== null && inports.layerHeight.value !== null && inports.nozzleDiameter.value !== null && inports.printSpeed.value !== null){
-            outports.path.value = generateGCode(inports.path.value, inports.nozzleDiameter.value, inports.printSpeed.value);
+        if(inports.path.value !== null && inports.layerHeight.value !== null && inports.nozzleDiameter.value !== null){
+            outports.path.value = generateGCode(inports.path.value, inports.layerHeight.value, inports.nozzleDiameter.value, inports.printSpeed.value);
         }  
     }
     return {inportsUpdated};

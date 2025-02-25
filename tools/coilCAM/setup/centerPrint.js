@@ -30,7 +30,8 @@ const config = {
     },
   },
   ui: {
-    displayName: "CC-CenterPrint",
+    displayName: "Center Print",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },
@@ -40,7 +41,6 @@ function centerPrint(inports, outports) {
     function inportsUpdated() {
         if (inports.path.value !== null && inports.position.value !== null && inports.bedDimensions.value && inports.layerHeight.value) {
             outports.path.value = ccCenterPrint(inports.path.value, inports.position.value, inports.bedDimensions.value, inports.layerHeight.value);
-            console.log("CCCenter print", ccCenterPrint(inports.path.value, inports.position.value, inports.bedDimensions.value));
         }
     }
     return {inportsUpdated};

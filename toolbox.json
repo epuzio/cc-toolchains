@@ -1,7 +1,7 @@
 [
   {
     "group": "CC: 1D Functions",
-    "icon": "bezier-curve",
+    "icon": "layer-group",
     "entries": [
       {
         "displayName": "Sinusoidal",
@@ -27,7 +27,7 @@
   },
   {
     "group": "CC: 2D Functions",
-    "icon": "bezier-curve",
+    "icon": "layer-group",
     "entries": [
       {
         "displayName": "Linear2D",
@@ -41,32 +41,58 @@
   },
   {
     "group": "CC: Complex Functions",
-    "icon": "bezier-curve",
+    "icon": "layer-group",
     "entries": [
       {
-        "displayName": "Union",
+        "displayName": "Custom 1D (Profile)",
+        "path": "coilCAM/complexFunctions/customProfile"
+      },
+      {
+        "displayName": "Custom 2D (Radius)",
+        "path": "coilCAM/complexFunctions/customRadius"
+      } 
+    ]
+  },
+  {
+    "group": "CC: Paths",
+    "icon": "layer-group",
+    "entries": [
+      {
+        "displayName": "Base (Fill)",
+        "path": "coilCAM/setup/baseFill"
+      },
+      {
+        "displayName": "Base (Spiral)",
+        "path": "coilCAM/setup/baseSpiral"
+      },
+      {
+        "displayName": "Join Paths",
+        "path": "operators/arrayOperators/joinArr"
+      },
+      {
+        "displayName": "Union Paths",
         "path": "coilCAM/complexFunctions/union"
       },
       {
-        "displayName": "Difference",
+        "displayName": "Difference Paths",
         "path": "coilCAM/complexFunctions/difference"
       },
       {
-        "displayName": "Custon Radius",
-        "path": "coilCAM/complexFunctions/customRadius"
+        "displayName": "Spiralize Path",
+        "path": "coilCAM/setup/spiralize"
       },
       {
-        "displayName": "Custon Profile",
-        "path": "coilCAM/complexFunctions/customProfile"
+        "displayName": "Center Print",
+        "path": "coilCAM/setup/centerPrint"
       }
     ]
   },
   {
     "group": "CC: Setup",
-    "icon": "bezier-curve",
+    "icon": "layer-group",
     "entries": [
       {
-        "displayName": "ToolpathUnitGenerator",
+        "displayName": "Toolpath Generator",
         "path": ["coilCAM/setup/ToolpathUnitGenerator", "coilCAM/setup/defaultVariables/ToolpathVariables"]
       },
       {
@@ -78,12 +104,8 @@
         "path": "coilCAM/setup/GCodeGenerator"
       },
       {
-        "displayName": "Center Print",
-        "path": "coilCAM/setup/centerPrint"
-      },
-      {
-        "displayName": "Spiralize",
-        "path": "coilCAM/setup/spiralize"
+        "displayName": "Download GCode",
+        "path": "coilCAM/setup/downloadGCode"
       }
     ]
   },
@@ -172,6 +194,24 @@
       }
     ]
   },
+  {
+    "group": "Array Operators",
+    "icon": "wave-square",
+    "entries": [
+      {
+        "displayName": "Add Array",
+        "path": "operators/arrayOperators/addArr"
+      },
+      {
+        "displayName": "Multiply Array",
+        "path": "operators/arrayOperators/multiplyArr"
+      },
+      {
+        "displayName": "Divide Array",
+        "path": "operators/arrayOperators/divideArr"
+      }
+    ]},
+
   {
     "group": "Constants",
     "icon": "calculator",

@@ -8,19 +8,19 @@ const config = {
   outports: {
     amplitude: {
       type: "number",
-      value: null,
+      value: 1.0,
     },
     period: {
       type: "number",
-      value: null,
+      value: 4.0,
     },
     offset: {
       type: "number",
-      value: null,
+      value: 0.0,
     },
     bumps: {
         type: "number",
-        value: null
+        value: 2.0
     },
     mode: {
       type: "string",
@@ -28,10 +28,10 @@ const config = {
     },
   },
   state: {
-        amplitude: 0.0,
-        period: 0.0,
+        amplitude: 1.0,
+        period: 4.0,
         offset: 0.0,
-        bumps: 0.0,
+        bumps: 2.0,
         mode: "additive",
   },
   ui: {

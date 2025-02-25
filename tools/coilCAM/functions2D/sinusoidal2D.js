@@ -29,6 +29,10 @@ const config = {
         type: "any", //check
         value: null,
     },
+    mode: {
+        type: "number",
+        value: null,
+    },
     nbPoints: {
         type: "number",
         value: null,
@@ -41,10 +45,6 @@ const config = {
         type: "any",
         value: null,
     },
-    mode: {
-        type: "number",
-        value: null,
-    },
   },
   outports: {
     values: { 
@@ -53,7 +53,8 @@ const config = {
     },
   },
   ui: {
-    displayName: "CC-sinusoidal2D",
+    displayName: "Sinusoidal2D",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },

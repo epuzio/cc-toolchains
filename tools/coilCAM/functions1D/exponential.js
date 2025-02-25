@@ -21,16 +21,16 @@ const config = {
         type: "any", //check
         value: null,
     },
+    mode: {
+      type: "number",
+      value: null,
+    },
     nbPoints: {
         type: "number",
         value: null,
     },
     values0: {
         type: "any",
-        value: null,
-    },
-    mode: {
-        type: "number",
         value: null,
     },
   },
@@ -41,7 +41,8 @@ const config = {
     },
   },
   ui: {
-    displayName: "CC-exponential",
+    displayName: "Exponential",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },

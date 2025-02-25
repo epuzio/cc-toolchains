@@ -18,6 +18,10 @@ const config = {
         type: "any", //check
         value: null,
     },
+    mode: {
+      type: "number",
+      value: null,
+    },
     nbPoints: {
         type: "number",
         value: null,
@@ -26,19 +30,16 @@ const config = {
         type: "any",
         value: null,
     },
-    mode: {
-        type: "number",
-        value: null,
-    },
   },
   outports: {
-    values: { //?
+    values: {
       type: "any",
       value: null,
     },
   },
   ui: {
-    displayName: "CC-staircase",
+    displayName: "Staircase",
+    icon: "wave-square",
     width: 130,
     height: 50,
   },
